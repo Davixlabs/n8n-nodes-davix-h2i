@@ -9,7 +9,8 @@
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   },
   "include": ["credentials/**/*.ts", "nodes/**/*.ts"]
 }
