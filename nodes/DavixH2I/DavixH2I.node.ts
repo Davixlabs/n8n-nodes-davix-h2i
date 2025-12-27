@@ -1,10 +1,11 @@
-import type {
-	IExecuteFunctions,
-	INodeExecutionData,
-	INodeType,
-	INodeTypeDescription,
-	IHttpRequestOptions,
-} from 'n8n-workflow';
+	import type {
+		IExecuteFunctions,
+		INodeExecutionData,
+		INodeType,
+		INodeTypeDescription,
+		IHttpRequestOptions,
+		IDataObject,
+	} from 'n8n-workflow';
 
 import { davixRequest, downloadToBinary } from './GenericFunctions';
 
@@ -72,6 +73,7 @@ export class DavixH2I implements INodeType {
 					name: 'resource',
 					type: 'options',
 					default: 'h2i',
+					description: 'Choose which PixLab endpoint to call (H2I, Image, PDF, or Tools). Sends action-specific parameters to that resource.',
 					options: [
 						{ name: 'H2I (HTML → Image)', value: 'h2i' },
 						{ name: 'Image (Transform / Export PDF)', value: 'image' },
@@ -87,6 +89,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'image',
 					displayOptions: { show: { resource: ['h2i'] } },
+					description: 'Select the PixLab H2I action. The node sends action=image or action=pdf accordingly.',
 					options: [
 						{ name: 'Render HTML to Image', value: 'image' },
 						{ name: 'Render HTML to PDF', value: 'pdf' },
@@ -100,6 +103,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'format',
 					displayOptions: { show: { resource: ['image'] } },
+					description: 'Select the PixLab Image action to run (sent as action=<value>).',
 					options: [
 						{ name: 'Format', value: 'format' },
 						{ name: 'Resize', value: 'resize' },
@@ -124,6 +128,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'merge',
 					displayOptions: { show: { resource: ['pdf'] } },
+					description: 'Select the PixLab PDF action to run (sent as action=<value>).',
 					options: [
 						{ name: 'To Images', value: 'to-images' },
 						{ name: 'Merge', value: 'merge' },
@@ -149,6 +154,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'single',
 					displayOptions: { show: { resource: ['tools'] } },
+					description: 'Select whether to run one tool or multiple tools in a single PixLab Tools request.',
 					options: [
 						{ name: 'Single Tool', value: 'single' },
 						{ name: 'Multitask', value: 'multitask' },
@@ -165,6 +171,8 @@ export class DavixH2I implements INodeType {
 					default: '',
 					required: true,
 					typeOptions: { rows: 6 },
+					placeholder: '<div>Hello</div>',
+					description: 'HTML markup to render via PixLab H2I.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -173,6 +181,8 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: '',
 					typeOptions: { rows: 4 },
+					placeholder: 'body { background: #fff; }',
+					description: 'Optional CSS styles applied to the HTML before rendering.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -180,6 +190,7 @@ export class DavixH2I implements INodeType {
 					name: 'width',
 					type: 'number',
 					default: 1000,
+					description: 'Output width in pixels.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -187,6 +198,7 @@ export class DavixH2I implements INodeType {
 					name: 'height',
 					type: 'number',
 					default: 1500,
+					description: 'Output height in pixels.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -194,6 +206,7 @@ export class DavixH2I implements INodeType {
 					name: 'format',
 					type: 'options',
 					default: 'png',
+					description: 'Image format when rendering HTML to an image.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -205,6 +218,7 @@ export class DavixH2I implements INodeType {
 					name: 'h2iPdfPageSize',
 					type: 'options',
 					default: 'auto',
+					description: 'Page size when rendering HTML to PDF.',
 					options: [
 						{ name: 'Auto', value: 'auto' },
 						{ name: 'A4', value: 'a4' },
@@ -217,6 +231,7 @@ export class DavixH2I implements INodeType {
 					name: 'h2iPdfOrientation',
 					type: 'options',
 					default: 'portrait',
+					description: 'PDF orientation for H2I PDF output.',
 					options: [
 						{ name: 'Portrait', value: 'portrait' },
 						{ name: 'Landscape', value: 'landscape' },
@@ -228,6 +243,7 @@ export class DavixH2I implements INodeType {
 					name: 'h2iPdfMargin',
 					type: 'number',
 					default: 0,
+					description: 'Page margin in pixels for H2I PDF.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -235,6 +251,7 @@ export class DavixH2I implements INodeType {
 					name: 'h2iPdfEmbedFormat',
 					type: 'options',
 					default: 'png',
+					description: 'Image format embedded inside the generated PDF.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -246,6 +263,7 @@ export class DavixH2I implements INodeType {
 					name: 'h2iPdfJpegQuality',
 					type: 'number',
 					default: 85,
+					description: 'JPEG quality used when embedding images into the PDF.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -253,6 +271,7 @@ export class DavixH2I implements INodeType {
 					name: 'downloadBinary',
 					type: 'boolean',
 					default: false,
+					description: 'If enabled, downloads the first result URL into a binary property.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -260,6 +279,7 @@ export class DavixH2I implements INodeType {
 					name: 'outputBinaryProperty',
 					type: 'string',
 					default: 'data',
+					description: 'Name of the binary property to store the downloaded file.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'], downloadBinary: [true] } },
 				},
 
@@ -268,19 +288,20 @@ export class DavixH2I implements INodeType {
 				// -------------------------
 			{
 				displayName: 'Input Binary Properties',
-				name: 'imageBinaryProps',
-				type: 'string',
-				default: 'data',
-				placeholder: 'data OR image1,image2',
+					name: 'imageBinaryProps',
+					type: 'string',
+					default: 'data',
+					placeholder: 'data OR image1,image2',
 					description:
-						'Comma-separated binary property names from previous nodes (each will be sent as an `images` file).',
-					displayOptions: { show: { resource: ['image'] } },
-				},
+						'Comma-separated binary properties containing images to upload (e.g. data,image1). Each entry is sent as an images file.',
+						displayOptions: { show: { resource: ['image'] } },
+					},
 				{
 					displayName: 'Format',
 					name: 'imageFormat',
 					type: 'options',
 					default: 'webp',
+					description: 'Output image format for non-multitask actions.',
 					options: [
 						{ name: 'JPEG', value: 'jpeg' },
 						{ name: 'PNG', value: 'png' },
@@ -292,26 +313,27 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['image'] }, hide: { operation: ['multitask'] } },
 				},
-				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
-				{ displayName: 'Height', name: 'imageHeight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
-				{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['resize'] } } },
-				{ displayName: 'Normalize Orientation', name: 'normalizeOrientation', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['resize', 'crop', 'enhance', 'metadata'] } } },
-				{ displayName: 'Crop X', name: 'cropX', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Crop Y', name: 'cropY', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Crop Width', name: 'cropWidth', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Crop Height', name: 'cropHeight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Background Color', name: 'backgroundColor', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['crop', 'compress', 'background'] } } },
-				{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Display P3', value: 'display-p3' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
-				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
-				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
+				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, description: 'Resize width in pixels (0 to auto).', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
+				{ displayName: 'Height', name: 'imageHeight', type: 'number', default: 0, description: 'Resize height in pixels (0 to auto).', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
+				{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, description: 'Allow upscaling when resizing.', displayOptions: { show: { resource: ['image'], operation: ['resize'] } } },
+				{ displayName: 'Normalize Orientation', name: 'normalizeOrientation', type: 'boolean', default: false, description: 'Auto-rotate based on EXIF orientation.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'crop', 'enhance', 'metadata'] } } },
+				{ displayName: 'Crop X', name: 'cropX', type: 'number', default: 0, description: 'Left offset for crop (requires crop width/height).', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Crop Y', name: 'cropY', type: 'number', default: 0, description: 'Top offset for crop (requires crop width/height).', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Crop Width', name: 'cropWidth', type: 'number', default: 0, description: 'Crop width in pixels.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Crop Height', name: 'cropHeight', type: 'number', default: 0, description: 'Crop height in pixels.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Background Color', name: 'backgroundColor', type: 'string', default: '', description: 'Background color to use for some actions (e.g. crop fill, compress, background).', displayOptions: { show: { resource: ['image'], operation: ['crop', 'compress', 'background'] } } },
+				{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, description: 'Rotate image by degrees.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Flip image horizontally.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Flip image vertically.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Color space to use for transforms/compress.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Display P3', value: 'display-p3' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
+				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, description: 'Target output size in KB for compression (optional).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
+				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, description: 'Compression quality (1-100).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{
 					displayName: 'Keep Metadata',
 					name: 'keepMetadata',
 					type: 'boolean',
 					default: false,
+					description: 'Preserve EXIF/metadata when possible.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -319,49 +341,51 @@ export class DavixH2I implements INodeType {
 						},
 					},
 				},
-				{ displayName: 'Blur', name: 'blur', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Sharpen', name: 'sharpen', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Sepia', name: 'sepia', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Brightness', name: 'brightness', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Contrast', name: 'contrast', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Saturation', name: 'saturation', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Pad', name: 'pad', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame'] } } },
-				{ displayName: 'Pad Top', name: 'padTop', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Right', name: 'padRight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Bottom', name: 'padBottom', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Left', name: 'padLeft', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Color', name: 'padColor', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame', 'background'] } } },
-				{ displayName: 'Border', name: 'border', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
-				{ displayName: 'Border Color', name: 'borderColor', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
-				{ displayName: 'Border Radius', name: 'borderRadius', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['padding', 'background'] } } },
-				{ displayName: 'Background Blur', name: 'backgroundBlur', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['background'] } } },
-				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Blur', name: 'blur', type: 'number', default: 0, description: 'Apply blur radius (0 to skip).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Sharpen', name: 'sharpen', type: 'number', default: 0, description: 'Sharpen amount (0 to skip).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, description: 'Convert image to grayscale.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Sepia', name: 'sepia', type: 'boolean', default: false, description: 'Apply sepia tone.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Brightness', name: 'brightness', type: 'number', default: 0, description: 'Adjust brightness (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Contrast', name: 'contrast', type: 'number', default: 0, description: 'Adjust contrast (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Saturation', name: 'saturation', type: 'number', default: 0, description: 'Adjust saturation (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Pad', name: 'pad', type: 'number', default: 0, description: 'Uniform padding size.', displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame'] } } },
+				{ displayName: 'Pad Top', name: 'padTop', type: 'number', default: 0, description: 'Top padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Right', name: 'padRight', type: 'number', default: 0, description: 'Right padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Bottom', name: 'padBottom', type: 'number', default: 0, description: 'Bottom padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Left', name: 'padLeft', type: 'number', default: 0, description: 'Left padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Color', name: 'padColor', type: 'string', default: '', description: 'Padding color (e.g. #ffffff).', displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame', 'background'] } } },
+				{ displayName: 'Border', name: 'border', type: 'number', default: 0, description: 'Border thickness in pixels.', displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
+				{ displayName: 'Border Color', name: 'borderColor', type: 'string', default: '', description: 'Border color (e.g. #000000).', displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
+				{ displayName: 'Border Radius', name: 'borderRadius', type: 'number', default: 0, description: 'Rounded corner radius.', displayOptions: { show: { resource: ['image'], operation: ['padding', 'background'] } } },
+				{ displayName: 'Background Blur', name: 'backgroundBlur', type: 'number', default: 0, description: 'Blur background by this radius.', displayOptions: { show: { resource: ['image'], operation: ['background'] } } },
+				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', description: 'Text watermark to overlay.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, description: 'Font size for text watermark.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', description: 'Text watermark color.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, description: 'Watermark opacity between 0 and 1.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Position',
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
-					options: [
-						{ name: 'Center', value: 'center' },
-						{ name: 'Top Left', value: 'top-left' },
-						{ name: 'Top Right', value: 'top-right' },
-						{ name: 'Bottom Left', value: 'bottom-left' },
-						{ name: 'Bottom Right', value: 'bottom-right' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['watermark'] } },
-				},
-				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+						options: [
+							{ name: 'Center', value: 'center' },
+							{ name: 'Top Left', value: 'top-left' },
+							{ name: 'Top Right', value: 'top-right' },
+							{ name: 'Bottom Left', value: 'bottom-left' },
+							{ name: 'Bottom Right', value: 'bottom-right' },
+						],
+						description: 'Position for text/image watermark.',
+						displayOptions: { show: { resource: ['image'], operation: ['watermark'] } },
+					},
+				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, description: 'Margin/padding around watermark.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Scale factor for watermark size.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Image Binary Property',
 					name: 'watermarkImageBinaryProp',
 					type: 'string',
 					default: '',
 					placeholder: 'watermarkImage',
+					description: 'Binary property containing an image watermark (optional).',
 					displayOptions: { show: { resource: ['image'], operation: ['watermark'] } },
 				},
 				{
@@ -423,223 +447,167 @@ export class DavixH2I implements INodeType {
 					default: 85,
 					displayOptions: { show: { resource: ['image'], operation: ['pdf'] } },
 				},
-				{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['metadata'] } } },
-				{
-					displayName: 'Multitask Options',
-					name: 'imageMultitaskOptions',
-					type: 'multiOptions',
-					default: [],
-					options: [
-						{ name: 'Format', value: 'format' },
-						{ name: 'Width', value: 'width' },
-						{ name: 'Height', value: 'height' },
-						{ name: 'Enlarge', value: 'enlarge' },
-						{ name: 'Normalize Orientation', value: 'normalizeOrientation' },
-						{ name: 'Crop', value: 'crop' },
-						{ name: 'Background Color', value: 'backgroundColor' },
-						{ name: 'Rotate', value: 'rotate' },
-						{ name: 'Flip Horizontal', value: 'flipH' },
-						{ name: 'Flip Vertical', value: 'flipV' },
-						{ name: 'Color Space', value: 'colorSpace' },
-						{ name: 'Target Size (KB)', value: 'targetSizeKB' },
-						{ name: 'Quality', value: 'quality' },
-						{ name: 'Keep Metadata', value: 'keepMetadata' },
-						{ name: 'Blur', value: 'blur' },
-						{ name: 'Sharpen', value: 'sharpen' },
-						{ name: 'Grayscale', value: 'grayscale' },
-						{ name: 'Sepia', value: 'sepia' },
-						{ name: 'Brightness', value: 'brightness' },
-						{ name: 'Contrast', value: 'contrast' },
-						{ name: 'Saturation', value: 'saturation' },
-						{ name: 'Pad', value: 'pad' },
-						{ name: 'Pad Sides', value: 'padSides' },
-						{ name: 'Pad Color', value: 'padColor' },
-						{ name: 'Border', value: 'border' },
-						{ name: 'Border Color', value: 'borderColor' },
-						{ name: 'Border Radius', value: 'borderRadius' },
-						{ name: 'Background Blur', value: 'backgroundBlur' },
-						{ name: 'Watermark', value: 'watermark' },
-						{ name: 'PDF Options', value: 'pdf' },
-						{ name: 'Include Raw EXIF', value: 'includeRawExif' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'] } },
-				},
-
-				// Conditional image fields for multitask
-				{
-					displayName: 'Format',
-					name: 'multiFormat',
-					type: 'options',
-					default: 'webp',
-					options: [
-						{ name: 'JPEG', value: 'jpeg' },
-						{ name: 'PNG', value: 'png' },
-						{ name: 'WebP', value: 'webp' },
-						{ name: 'AVIF', value: 'avif' },
-						{ name: 'GIF', value: 'gif' },
-						{ name: 'SVG', value: 'svg' },
-						{ name: 'PDF', value: 'pdf' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['format'] } },
-				},
-				{ displayName: 'Width', name: 'multiWidth', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['width'] } } },
-				{ displayName: 'Height', name: 'multiHeight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['height'] } } },
-				{ displayName: 'Enlarge', name: 'multiEnlarge', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['enlarge'] } } },
-				{
-					displayName: 'Normalize Orientation',
-					name: 'multiNormalizeOrientation',
-					type: 'boolean',
-					default: false,
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['normalizeOrientation'] } },
-				},
-				{ displayName: 'Crop X', name: 'multiCropX', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['crop'] } } },
-				{ displayName: 'Crop Y', name: 'multiCropY', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['crop'] } } },
-				{ displayName: 'Crop Width', name: 'multiCropWidth', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['crop'] } } },
-				{ displayName: 'Crop Height', name: 'multiCropHeight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['crop'] } } },
-				{ displayName: 'Background Color', name: 'multiBackgroundColor', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['backgroundColor'] } } },
-				{ displayName: 'Rotate (degrees)', name: 'multiRotate', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['rotate'] } } },
-				{ displayName: 'Flip Horizontal', name: 'multiFlipH', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['flipH'] } } },
-				{ displayName: 'Flip Vertical', name: 'multiFlipV', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['flipV'] } } },
-				{
-					displayName: 'Color Space',
-					name: 'multiColorSpace',
-					type: 'options',
-					default: 'srgb',
-					options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Display P3', value: 'display-p3' }],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['colorSpace'] } },
-				},
-				{ displayName: 'Target Size (KB)', name: 'multiTargetSizeKB', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['targetSizeKB'] } } },
-				{ displayName: 'Quality', name: 'multiQuality', type: 'number', default: 82, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['quality'] } } },
-				{
-					displayName: 'Keep Metadata',
-					name: 'multiKeepMetadata',
-					type: 'boolean',
-					default: false,
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['keepMetadata'] } },
-				},
-				{ displayName: 'Blur', name: 'multiBlur', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['blur'] } } },
-				{ displayName: 'Sharpen', name: 'multiSharpen', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['sharpen'] } } },
-				{ displayName: 'Grayscale', name: 'multiGrayscale', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['grayscale'] } } },
-				{ displayName: 'Sepia', name: 'multiSepia', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['sepia'] } } },
-				{ displayName: 'Brightness', name: 'multiBrightness', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['brightness'] } } },
-				{ displayName: 'Contrast', name: 'multiContrast', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['contrast'] } } },
-				{ displayName: 'Saturation', name: 'multiSaturation', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['saturation'] } } },
-				{ displayName: 'Pad', name: 'multiPad', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['pad'] } } },
-				{
-					displayName: 'Pad Sides',
-					name: 'multiPadSides',
-					type: 'boolean',
-					default: false,
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['padSides'] } },
-				},
-				{ displayName: 'Pad Top', name: 'multiPadTop', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['padSides'] } } },
-				{ displayName: 'Pad Right', name: 'multiPadRight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['padSides'] } } },
-				{ displayName: 'Pad Bottom', name: 'multiPadBottom', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['padSides'] } } },
-				{ displayName: 'Pad Left', name: 'multiPadLeft', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['padSides'] } } },
-				{ displayName: 'Pad Color', name: 'multiPadColor', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['padColor'] } } },
-				{ displayName: 'Border', name: 'multiBorder', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['border'] } } },
-				{ displayName: 'Border Color', name: 'multiBorderColor', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['borderColor'] } } },
-				{ displayName: 'Border Radius', name: 'multiBorderRadius', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['borderRadius'] } } },
-				{ displayName: 'Background Blur', name: 'multiBackgroundBlur', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['backgroundBlur'] } } },
-				{ displayName: 'Watermark Text', name: 'multiWatermarkText', type: 'string', default: '', displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } } },
-				{ displayName: 'Watermark Font Size', name: 'multiWatermarkFontSize', type: 'number', default: 24, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } } },
-				{ displayName: 'Watermark Color', name: 'multiWatermarkColor', type: 'string', default: '#000000', displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } } },
-				{ displayName: 'Watermark Opacity', name: 'multiWatermarkOpacity', type: 'number', default: 0.35, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } } },
-				{
-					displayName: 'Watermark Position',
-					name: 'multiWatermarkPosition',
-					type: 'options',
-					default: 'center',
-					options: [
-						{ name: 'Center', value: 'center' },
-						{ name: 'Top Left', value: 'top-left' },
-						{ name: 'Top Right', value: 'top-right' },
-						{ name: 'Bottom Left', value: 'bottom-left' },
-						{ name: 'Bottom Right', value: 'bottom-right' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } },
-				},
-				{ displayName: 'Watermark Margin', name: 'multiWatermarkMargin', type: 'number', default: 8, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } } },
-				{ displayName: 'Watermark Scale', name: 'multiWatermarkScale', type: 'number', default: 1, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } } },
-				{
-					displayName: 'Watermark Image Binary Property',
-					name: 'multiWatermarkImageBinaryProp',
-					type: 'string',
-					default: '',
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['watermark'] } },
-				},
-				{
-					displayName: 'PDF Mode',
-					name: 'multiPdfMode',
-					type: 'options',
-					default: 'single',
-					options: [
-						{ name: 'Single', value: 'single' },
-						{ name: 'Multi', value: 'multi' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['pdf'] } },
-				},
-				{
-					displayName: 'PDF Page Size',
-					name: 'multiPdfPageSize',
-					type: 'options',
-					default: 'auto',
-					options: [
-						{ name: 'Auto', value: 'auto' },
-						{ name: 'A4', value: 'a4' },
-						{ name: 'Letter', value: 'letter' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['pdf'] } },
-				},
-				{
-					displayName: 'PDF Orientation',
-					name: 'multiPdfOrientation',
-					type: 'options',
-					default: 'portrait',
-					options: [
-						{ name: 'Portrait', value: 'portrait' },
-						{ name: 'Landscape', value: 'landscape' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['pdf'] } },
-				},
-				{
-					displayName: 'PDF Margin',
-					name: 'multiPdfMargin',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['pdf'] } },
-				},
-				{
-					displayName: 'PDF Embed Format',
-					name: 'multiPdfEmbedFormat',
-					type: 'options',
-					default: 'png',
-					options: [
-						{ name: 'PNG', value: 'png' },
-						{ name: 'JPEG', value: 'jpeg' },
-					],
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['pdf'] } },
-				},
-				{
-					displayName: 'PDF JPEG Quality',
-					name: 'multiPdfJpegQuality',
-					type: 'number',
-					default: 85,
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['pdf'] } },
-				},
-				{
-					displayName: 'Include Raw EXIF',
-					name: 'multiIncludeRawExif',
-					type: 'boolean',
-					default: false,
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['includeRawExif'] } },
-				},
+					{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Include raw EXIF data when available.', displayOptions: { show: { resource: ['image'], operation: ['metadata'] } } },
+					{
+						displayName: 'Options',
+						name: 'options',
+						type: 'collection',
+						default: {},
+						placeholder: 'Add option',
+						description: 'Optional PixLab multitask parameters. Only selected options are sent.',
+						displayOptions: { show: { resource: ['image'], operation: ['multitask'] } },
+						options: [
+							{
+								displayName: 'Format',
+								name: 'format',
+								type: 'options',
+								default: 'webp',
+								description: 'Output format for the multitask result.',
+								options: [
+									{ name: 'JPEG', value: 'jpeg' },
+									{ name: 'PNG', value: 'png' },
+									{ name: 'WebP', value: 'webp' },
+									{ name: 'AVIF', value: 'avif' },
+									{ name: 'GIF', value: 'gif' },
+									{ name: 'SVG', value: 'svg' },
+									{ name: 'PDF', value: 'pdf' },
+								],
+							},
+							{ displayName: 'Width', name: 'width', type: 'number', default: 0, description: 'Resize width in pixels.' },
+							{ displayName: 'Height', name: 'height', type: 'number', default: 0, description: 'Resize height in pixels.' },
+							{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, description: 'Allow upscaling when resizing.' },
+							{
+								displayName: 'Normalize Orientation',
+								name: 'normalizeOrientation',
+								type: 'boolean',
+								default: false,
+								description: 'Auto-rotate based on EXIF orientation.',
+							},
+							{ displayName: 'Crop X', name: 'cropX', type: 'number', default: 0, description: 'Left offset for crop.' },
+							{ displayName: 'Crop Y', name: 'cropY', type: 'number', default: 0, description: 'Top offset for crop.' },
+							{ displayName: 'Crop Width', name: 'cropWidth', type: 'number', default: 0, description: 'Crop width in pixels.' },
+							{ displayName: 'Crop Height', name: 'cropHeight', type: 'number', default: 0, description: 'Crop height in pixels.' },
+							{ displayName: 'Background Color', name: 'backgroundColor', type: 'string', default: '', description: 'Background color used for fills or padding.' },
+							{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, description: 'Rotate image by degrees.' },
+							{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Flip image horizontally.' },
+							{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Flip image vertically.' },
+							{
+								displayName: 'Color Space',
+								name: 'colorSpace',
+								type: 'options',
+								default: 'srgb',
+								description: 'Color space for processing.',
+								options: [
+									{ name: 'sRGB', value: 'srgb' },
+									{ name: 'Display P3', value: 'display-p3' },
+								],
+							},
+							{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, description: 'Target compressed size in KB.' },
+							{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, description: 'Output quality (1-100).' },
+							{ displayName: 'Keep Metadata', name: 'keepMetadata', type: 'boolean', default: false, description: 'Keep EXIF/metadata when possible.' },
+							{ displayName: 'Blur', name: 'blur', type: 'number', default: 0, description: 'Blur radius.' },
+							{ displayName: 'Sharpen', name: 'sharpen', type: 'number', default: 0, description: 'Sharpen amount.' },
+							{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, description: 'Convert to grayscale.' },
+							{ displayName: 'Sepia', name: 'sepia', type: 'boolean', default: false, description: 'Apply sepia tone.' },
+							{ displayName: 'Brightness', name: 'brightness', type: 'number', default: 0, description: 'Brightness adjustment (-100 to 100).' },
+							{ displayName: 'Contrast', name: 'contrast', type: 'number', default: 0, description: 'Contrast adjustment (-100 to 100).' },
+							{ displayName: 'Saturation', name: 'saturation', type: 'number', default: 0, description: 'Saturation adjustment (-100 to 100).' },
+							{ displayName: 'Pad', name: 'pad', type: 'number', default: 0, description: 'Uniform padding size.' },
+							{ displayName: 'Pad Color', name: 'padColor', type: 'string', default: '', description: 'Padding color (e.g. #ffffff).' },
+							{ displayName: 'Pad Top', name: 'padTop', type: 'number', default: 0, description: 'Top padding override.' },
+							{ displayName: 'Pad Right', name: 'padRight', type: 'number', default: 0, description: 'Right padding override.' },
+							{ displayName: 'Pad Bottom', name: 'padBottom', type: 'number', default: 0, description: 'Bottom padding override.' },
+							{ displayName: 'Pad Left', name: 'padLeft', type: 'number', default: 0, description: 'Left padding override.' },
+							{ displayName: 'Border Radius', name: 'borderRadius', type: 'number', default: 0, description: 'Rounded corner radius.' },
+							{ displayName: 'Border', name: 'border', type: 'number', default: 0, description: 'Border thickness in pixels.' },
+							{ displayName: 'Border Color', name: 'borderColor', type: 'string', default: '', description: 'Border color (e.g. #000000).' },
+							{ displayName: 'Background Blur', name: 'backgroundBlur', type: 'number', default: 0, description: 'Background blur radius.' },
+							{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', description: 'Text watermark content.' },
+							{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, description: 'Font size for text watermark.' },
+							{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', description: 'Color for text watermark.' },
+							{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, description: 'Watermark opacity (0-1).' },
+							{
+								displayName: 'Watermark Position',
+								name: 'watermarkPosition',
+								type: 'options',
+								default: 'center',
+								description: 'Placement for watermark.',
+								options: [
+									{ name: 'Center', value: 'center' },
+									{ name: 'Top Left', value: 'top-left' },
+									{ name: 'Top Right', value: 'top-right' },
+									{ name: 'Bottom Left', value: 'bottom-left' },
+									{ name: 'Bottom Right', value: 'bottom-right' },
+								],
+							},
+							{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, description: 'Margin/padding around watermark.' },
+							{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Scale factor for watermark.' },
+							{
+								displayName: 'PDF Mode',
+								name: 'pdfMode',
+								type: 'options',
+								default: 'single',
+								description: 'Single or multi-page PDF export.',
+								options: [
+									{ name: 'Single', value: 'single' },
+									{ name: 'Multi', value: 'multi' },
+								],
+							},
+							{
+								displayName: 'PDF Page Size',
+								name: 'pdfPageSize',
+								type: 'options',
+								default: 'auto',
+								description: 'Page size for PDF output.',
+								options: [
+									{ name: 'Auto', value: 'auto' },
+									{ name: 'A4', value: 'a4' },
+									{ name: 'Letter', value: 'letter' },
+								],
+							},
+							{
+								displayName: 'PDF Orientation',
+								name: 'pdfOrientation',
+								type: 'options',
+								default: 'portrait',
+								description: 'Orientation for PDF pages.',
+								options: [
+									{ name: 'Portrait', value: 'portrait' },
+									{ name: 'Landscape', value: 'landscape' },
+								],
+							},
+							{ displayName: 'PDF Margin', name: 'pdfMargin', type: 'number', default: 0, description: 'Page margin for PDF output.' },
+							{
+								displayName: 'PDF Embed Format',
+								name: 'pdfEmbedFormat',
+								type: 'options',
+								default: 'png',
+								description: 'Image format embedded in the PDF.',
+								options: [
+									{ name: 'PNG', value: 'png' },
+									{ name: 'JPEG', value: 'jpeg' },
+								],
+							},
+							{ displayName: 'PDF JPEG Quality', name: 'pdfJpegQuality', type: 'number', default: 85, description: 'JPEG quality for PDF embedding.' },
+							{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Include raw EXIF data when available.' },
+						],
+					},
+					{
+						displayName: 'Watermark Image Binary Property',
+						name: 'watermarkBinaryProperty',
+						type: 'string',
+						default: '',
+						placeholder: 'watermarkImage',
+						description: 'Binary property containing an image watermark (used if watermark options are set).',
+						displayOptions: { show: { resource: ['image'], operation: ['multitask'] } },
+					},
 
 				{
 					displayName: 'Download Result(s) as Binary',
 					name: 'imageDownloadBinary',
 					type: 'boolean',
 					default: false,
+					description: 'Download the first returned URL into binary data (results remain in JSON).',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -652,6 +620,7 @@ export class DavixH2I implements INodeType {
 					name: 'imageOutputBinaryProperty',
 					type: 'string',
 					default: 'data',
+					description: 'Binary property name to store the downloaded file.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -679,6 +648,7 @@ export class DavixH2I implements INodeType {
 					name: 'sortByName',
 					type: 'boolean',
 					default: false,
+					description: 'When merging, sort uploaded PDFs by filename before merging.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['merge'] } },
 				},
 				{
@@ -687,6 +657,7 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: '',
 					placeholder: '1-3,4-5',
+					description: 'Page ranges to keep when splitting (e.g. 1-3,5).',
 					displayOptions: { show: { resource: ['pdf'], operation: ['split'] } },
 				},
 				{
@@ -694,6 +665,7 @@ export class DavixH2I implements INodeType {
 					name: 'prefix',
 					type: 'string',
 					default: 'split_',
+					description: 'Prefix for split output files.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['split', 'extract'] } },
 				},
 				{
@@ -702,6 +674,7 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: 'all',
 					placeholder: 'all OR 1-3,5,7',
+					description: 'Page selection, e.g. all or 1-3,5.',
 					displayOptions: {
 						show: { resource: ['pdf'], operation: ['to-images', 'extract-images', 'watermark', 'rotate', 'delete-pages', 'extract'] },
 					},
@@ -711,6 +684,7 @@ export class DavixH2I implements INodeType {
 					name: 'toFormat',
 					type: 'options',
 					default: 'png',
+					description: 'Image format when converting PDF pages.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -718,15 +692,16 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } },
 				},
-				{ displayName: 'Width', name: 'pdfWidth', type: 'number', default: 0, displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
-				{ displayName: 'Height', name: 'pdfHeight', type: 'number', default: 0, displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
-				{ displayName: 'DPI', name: 'dpi', type: 'number', default: 150, displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
+				{ displayName: 'Width', name: 'pdfWidth', type: 'number', default: 0, description: 'Resize width for PDF to images (optional).', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
+				{ displayName: 'Height', name: 'pdfHeight', type: 'number', default: 0, description: 'Resize height for PDF to images (optional).', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
+				{ displayName: 'DPI', name: 'dpi', type: 'number', default: 150, description: 'Rendering DPI for PDF to images.', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
 
 				{
 					displayName: 'Extract Image Format',
 					name: 'extractImageFormat',
 					type: 'options',
 					default: 'png',
+					description: 'Image format for extracted images.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -734,8 +709,8 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['pdf'], operation: ['extract-images'] } },
 				},
-				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', description: 'Optional text watermark to apply.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, description: 'Watermark opacity (0-1).', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Position',
 					name: 'watermarkPosition',
@@ -753,34 +728,36 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Scale factor for watermark.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Image Binary Property',
 					name: 'watermarkImageBinaryProp',
 					type: 'string',
 					default: '',
+					description: 'Binary property containing an image watermark (optional).',
 					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
 				},
-				{ displayName: 'Degrees', name: 'degrees', type: 'number', default: 0, displayOptions: { show: { resource: ['pdf'], operation: ['rotate'] } } },
-				{ displayName: 'Title', name: 'title', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Author', name: 'author', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Subject', name: 'subject', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Keywords', name: 'keywords', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Creator', name: 'creator', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Order (JSON array)', name: 'order', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
-				{ displayName: 'Mode', name: 'mode', type: 'string', default: 'range', displayOptions: { show: { resource: ['pdf'], operation: ['extract'] } } },
-				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: false, displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
-				{ displayName: 'User Password', name: 'userPassword', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
-				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
-				{ displayName: 'Password', name: 'password', type: 'string', default: '', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
+				{ displayName: 'Degrees', name: 'degrees', type: 'number', default: 0, description: 'Rotation angle in degrees.', displayOptions: { show: { resource: ['pdf'], operation: ['rotate'] } } },
+				{ displayName: 'Title', name: 'title', type: 'string', default: '', description: 'Set PDF title metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Author', name: 'author', type: 'string', default: '', description: 'Set PDF author metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Subject', name: 'subject', type: 'string', default: '', description: 'Set PDF subject metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Keywords', name: 'keywords', type: 'string', default: '', description: 'Set PDF keywords metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Creator', name: 'creator', type: 'string', default: '', description: 'Set PDF creator metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF producer metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Remove existing metadata before applying new fields.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Order (JSON array)', name: 'order', type: 'string', default: '', description: 'JSON array describing new page order (e.g. [2,1,3]).', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
+				{ displayName: 'Mode', name: 'mode', type: 'string', default: 'range', description: 'Extraction mode (e.g. range).', displayOptions: { show: { resource: ['pdf'], operation: ['extract'] } } },
+				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: false, description: 'Flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
+				{ displayName: 'User Password', name: 'userPassword', type: 'string', default: '', description: 'User password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
+				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', default: '', description: 'Owner password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
+				{ displayName: 'Password', name: 'password', type: 'string', default: '', description: 'Password to decrypt PDF.', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
 
 				{
 					displayName: 'Download Result(s) as Binary',
 					name: 'pdfDownloadBinary',
 					type: 'boolean',
 					default: false,
+					description: 'If enabled, download the first URL result into a binary property.',
 					displayOptions: { show: { resource: ['pdf'] } },
 				},
 				{
@@ -788,6 +765,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfOutputBinaryProperty',
 					type: 'string',
 					default: 'data',
+					description: 'Binary property name to store downloaded PDF/image results.',
 					displayOptions: { show: { resource: ['pdf'], pdfDownloadBinary: [true] } },
 				},
 
@@ -800,7 +778,7 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: 'data',
 					placeholder: 'data OR img1,img2',
-					description: 'Comma-separated binary property names (each will be sent as an `images` file).',
+					description: 'Comma-separated binary properties containing images to analyze (sent as images files).',
 					displayOptions: { show: { resource: ['tools'] } },
 				},
 				{
@@ -808,6 +786,7 @@ export class DavixH2I implements INodeType {
 					name: 'tool',
 					type: 'options',
 					default: 'metadata',
+					description: 'Single PixLab tool to run in action=single.',
 					options: [
 						{ name: 'Metadata', value: 'metadata' },
 						{ name: 'Colors', value: 'colors' },
@@ -828,6 +807,7 @@ export class DavixH2I implements INodeType {
 					name: 'tools',
 					type: 'multiOptions',
 					default: ['metadata'],
+					description: 'Multiple PixLab tools to run together in action=multitask.',
 					options: [
 						{ name: 'Metadata', value: 'metadata' },
 						{ name: 'Colors', value: 'colors' },
@@ -844,140 +824,66 @@ export class DavixH2I implements INodeType {
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'] } },
 				},
 				{
-					displayName: 'Include Raw EXIF',
-					name: 'includeRawExif',
-					type: 'boolean',
-					default: false,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['metadata'] } },
-				},
-				{
-					displayName: 'Include Raw EXIF',
-					name: 'multiIncludeRawExif',
-					type: 'boolean',
-					default: false,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['metadata'] } },
-				},
-				{
-					displayName: 'Palette Size',
-					name: 'paletteSize',
-					type: 'number',
-					default: 5,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['palette'] } },
-				},
-				{
-					displayName: 'Palette Size',
-					name: 'multiPaletteSize',
-					type: 'number',
-					default: 5,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['palette'] } },
-				},
-				{
-					displayName: 'Hash Type',
-					name: 'hashType',
-					type: 'options',
-					default: 'phash',
+					displayName: 'Options',
+					name: 'options',
+					type: 'collection',
+					default: {},
+					placeholder: 'Add option',
+					description: 'Optional tool parameters (only applied when the selected tool supports them).',
+					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
 					options: [
-						{ name: 'pHash', value: 'phash' },
-						{ name: 'MD5', value: 'md5' },
-						{ name: 'SHA1', value: 'sha1' },
+						{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Include raw EXIF data (metadata tool only).' },
+						{ displayName: 'Palette Size', name: 'paletteSize', type: 'number', default: 5, description: 'Number of colors to extract (palette tool).' },
+						{
+							displayName: 'Hash Type',
+							name: 'hashType',
+							type: 'options',
+							default: 'phash',
+							description: 'Hash algorithm to compute (hash tool).',
+							options: [
+								{ name: 'pHash', value: 'phash' },
+								{ name: 'MD5', value: 'md5' },
+								{ name: 'SHA1', value: 'sha1' },
+							],
+						},
+						{ displayName: 'Similarity Mode', name: 'similarityMode', type: 'string', default: '', description: 'Similarity mode (similarity tool).' },
+						{ displayName: 'Similarity Threshold', name: 'similarityThreshold', type: 'number', default: 0, description: 'Similarity threshold (similarity tool).' },
+						{ displayName: 'Quality Sample', name: 'qualitySample', type: 'number', default: 0, description: 'Sample size for quality analysis (quality tool).' },
+						{ displayName: 'Transparency Sample', name: 'transparencySample', type: 'number', default: 0, description: 'Sample size for transparency analysis (transparency tool).' },
+						{ displayName: 'Efficiency Format', name: 'efficiencyFormat', type: 'string', default: '', description: 'Output format for efficiency tool.' },
+						{ displayName: 'Efficiency Quality', name: 'efficiencyQuality', type: 'number', default: 0, description: 'Quality setting for efficiency tool.' },
 					],
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['hash'] } },
 				},
 				{
-					displayName: 'Hash Type',
-					name: 'multiHashType',
-					type: 'options',
-					default: 'phash',
+					displayName: 'Options',
+					name: 'options',
+					type: 'collection',
+					default: {},
+					placeholder: 'Add option',
+					description: 'Optional tool parameters (applied per selected tool).',
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'] } },
 					options: [
-						{ name: 'pHash', value: 'phash' },
-						{ name: 'MD5', value: 'md5' },
-						{ name: 'SHA1', value: 'sha1' },
+						{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Include raw EXIF data (metadata tool).' },
+						{ displayName: 'Palette Size', name: 'paletteSize', type: 'number', default: 5, description: 'Number of colors to extract (palette tool).' },
+						{
+							displayName: 'Hash Type',
+							name: 'hashType',
+							type: 'options',
+							default: 'phash',
+							description: 'Hash algorithm to compute (hash tool).',
+							options: [
+								{ name: 'pHash', value: 'phash' },
+								{ name: 'MD5', value: 'md5' },
+								{ name: 'SHA1', value: 'sha1' },
+							],
+						},
+						{ displayName: 'Similarity Mode', name: 'similarityMode', type: 'string', default: '', description: 'Similarity mode (similarity tool).' },
+						{ displayName: 'Similarity Threshold', name: 'similarityThreshold', type: 'number', default: 0, description: 'Similarity threshold (similarity tool).' },
+						{ displayName: 'Quality Sample', name: 'qualitySample', type: 'number', default: 0, description: 'Sample size for quality analysis (quality tool).' },
+						{ displayName: 'Transparency Sample', name: 'transparencySample', type: 'number', default: 0, description: 'Sample size for transparency analysis (transparency tool).' },
+						{ displayName: 'Efficiency Format', name: 'efficiencyFormat', type: 'string', default: '', description: 'Output format for efficiency tool.' },
+						{ displayName: 'Efficiency Quality', name: 'efficiencyQuality', type: 'number', default: 0, description: 'Quality setting for efficiency tool.' },
 					],
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['hash'] } },
-				},
-				{
-					displayName: 'Quality Sample',
-					name: 'qualitySample',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['quality'] } },
-				},
-				{
-					displayName: 'Quality Sample',
-					name: 'multiQualitySample',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['quality'] } },
-				},
-				{
-					displayName: 'Transparency Sample',
-					name: 'transparencySample',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['transparency'] } },
-				},
-				{
-					displayName: 'Transparency Sample',
-					name: 'multiTransparencySample',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['transparency'] } },
-				},
-				{
-					displayName: 'Similarity Mode',
-					name: 'similarityMode',
-					type: 'string',
-					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
-				},
-				{
-					displayName: 'Similarity Mode',
-					name: 'multiSimilarityMode',
-					type: 'string',
-					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
-				},
-				{
-					displayName: 'Similarity Threshold',
-					name: 'similarityThreshold',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
-				},
-				{
-					displayName: 'Similarity Threshold',
-					name: 'multiSimilarityThreshold',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
-				},
-				{
-					displayName: 'Efficiency Format',
-					name: 'efficiencyFormat',
-					type: 'string',
-					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['efficiency'] } },
-				},
-				{
-					displayName: 'Efficiency Format',
-					name: 'multiEfficiencyFormat',
-					type: 'string',
-					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['efficiency'] } },
-				},
-				{
-					displayName: 'Efficiency Quality',
-					name: 'efficiencyQuality',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['efficiency'] } },
-				},
-				{
-					displayName: 'Efficiency Quality',
-					name: 'multiEfficiencyQuality',
-					type: 'number',
-					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['efficiency'] } },
 				},
 			],
 		};
@@ -1225,66 +1131,61 @@ export class DavixH2I implements INodeType {
 							setBool('includeRawExif', this.getNodeParameter('includeRawExif', itemIndex) as boolean);
 							break;
 						case 'multitask': {
-							const options = this.getNodeParameter('imageMultitaskOptions', itemIndex) as string[];
-							const has = (key: string) => options.includes(key);
-							if (has('format')) setString('format', this.getNodeParameter('multiFormat', itemIndex) as string);
-							if (has('width')) setNumber('width', this.getNodeParameter('multiWidth', itemIndex) as number);
-							if (has('height')) setNumber('height', this.getNodeParameter('multiHeight', itemIndex) as number);
-							if (has('enlarge')) setBool('enlarge', this.getNodeParameter('multiEnlarge', itemIndex) as boolean);
-							if (has('normalizeOrientation')) setBool('normalizeOrientation', this.getNodeParameter('multiNormalizeOrientation', itemIndex) as boolean);
-							if (has('crop')) {
-								setNumber('cropX', this.getNodeParameter('multiCropX', itemIndex) as number);
-								setNumber('cropY', this.getNodeParameter('multiCropY', itemIndex) as number);
-								setNumber('cropWidth', this.getNodeParameter('multiCropWidth', itemIndex) as number);
-								setNumber('cropHeight', this.getNodeParameter('multiCropHeight', itemIndex) as number);
-							}
-							if (has('backgroundColor')) setString('backgroundColor', this.getNodeParameter('multiBackgroundColor', itemIndex) as string);
-							if (has('rotate')) setNumber('rotate', this.getNodeParameter('multiRotate', itemIndex) as number);
-							if (has('flipH')) setBool('flipH', this.getNodeParameter('multiFlipH', itemIndex) as boolean);
-							if (has('flipV')) setBool('flipV', this.getNodeParameter('multiFlipV', itemIndex) as boolean);
-							if (has('colorSpace')) formData.colorSpace = this.getNodeParameter('multiColorSpace', itemIndex) as string;
-							if (has('targetSizeKB')) setNumber('targetSizeKB', this.getNodeParameter('multiTargetSizeKB', itemIndex) as number);
-							if (has('quality')) setNumber('quality', this.getNodeParameter('multiQuality', itemIndex) as number);
-							if (has('keepMetadata')) setBool('keepMetadata', this.getNodeParameter('multiKeepMetadata', itemIndex) as boolean);
-							if (has('blur')) setNumber('blur', this.getNodeParameter('multiBlur', itemIndex) as number);
-							if (has('sharpen')) setNumber('sharpen', this.getNodeParameter('multiSharpen', itemIndex) as number);
-							if (has('grayscale')) setBool('grayscale', this.getNodeParameter('multiGrayscale', itemIndex) as boolean);
-							if (has('sepia')) setBool('sepia', this.getNodeParameter('multiSepia', itemIndex) as boolean);
-							if (has('brightness')) setNumber('brightness', this.getNodeParameter('multiBrightness', itemIndex) as number);
-							if (has('contrast')) setNumber('contrast', this.getNodeParameter('multiContrast', itemIndex) as number);
-							if (has('saturation')) setNumber('saturation', this.getNodeParameter('multiSaturation', itemIndex) as number);
-							if (has('pad')) setNumber('pad', this.getNodeParameter('multiPad', itemIndex) as number);
-							if (has('padSides')) {
-								setBool('padSides', this.getNodeParameter('multiPadSides', itemIndex) as boolean);
-								setNumber('padTop', this.getNodeParameter('multiPadTop', itemIndex) as number);
-								setNumber('padRight', this.getNodeParameter('multiPadRight', itemIndex) as number);
-								setNumber('padBottom', this.getNodeParameter('multiPadBottom', itemIndex) as number);
-								setNumber('padLeft', this.getNodeParameter('multiPadLeft', itemIndex) as number);
-							}
-							if (has('padColor')) setString('padColor', this.getNodeParameter('multiPadColor', itemIndex) as string);
-							if (has('border')) setNumber('border', this.getNodeParameter('multiBorder', itemIndex) as number);
-							if (has('borderColor')) setString('borderColor', this.getNodeParameter('multiBorderColor', itemIndex) as string);
-							if (has('borderRadius')) setNumber('borderRadius', this.getNodeParameter('multiBorderRadius', itemIndex) as number);
-							if (has('backgroundBlur')) setNumber('backgroundBlur', this.getNodeParameter('multiBackgroundBlur', itemIndex) as number);
-							if (has('watermark')) {
-								setString('watermarkText', this.getNodeParameter('multiWatermarkText', itemIndex) as string);
-								setNumber('watermarkFontSize', this.getNodeParameter('multiWatermarkFontSize', itemIndex) as number);
-								setString('watermarkColor', this.getNodeParameter('multiWatermarkColor', itemIndex) as string);
-								setNumber('watermarkOpacity', this.getNodeParameter('multiWatermarkOpacity', itemIndex) as number);
-								formData.watermarkPosition = this.getNodeParameter('multiWatermarkPosition', itemIndex) as string;
-								setNumber('watermarkMargin', this.getNodeParameter('multiWatermarkMargin', itemIndex) as number);
-								setNumber('watermarkScale', this.getNodeParameter('multiWatermarkScale', itemIndex) as number);
-								await includeWatermarkFile(this.getNodeParameter('multiWatermarkImageBinaryProp', itemIndex) as string);
-							}
-							if (has('pdf')) {
-								formData.pdfMode = this.getNodeParameter('multiPdfMode', itemIndex) as string;
-								formData.pdfPageSize = this.getNodeParameter('multiPdfPageSize', itemIndex) as string;
-								formData.pdfOrientation = this.getNodeParameter('multiPdfOrientation', itemIndex) as string;
-								setNumber('pdfMargin', this.getNodeParameter('multiPdfMargin', itemIndex) as number);
-								formData.pdfEmbedFormat = this.getNodeParameter('multiPdfEmbedFormat', itemIndex) as string;
-								setNumber('pdfJpegQuality', this.getNodeParameter('multiPdfJpegQuality', itemIndex) as number);
-							}
-							if (has('includeRawExif')) setBool('includeRawExif', this.getNodeParameter('multiIncludeRawExif', itemIndex) as boolean);
+							const options = (this.getNodeParameter('options', itemIndex, {}) as IDataObject) || {};
+							const hasVal = (key: string) => Object.prototype.hasOwnProperty.call(options, key);
+							const getOpt = (key: string) => options[key];
+
+							if (hasVal('format')) setString('format', getOpt('format') as string);
+							if (hasVal('width')) setNumber('width', Number(getOpt('width')));
+							if (hasVal('height')) setNumber('height', Number(getOpt('height')));
+							if (hasVal('enlarge')) setBool('enlarge', Boolean(getOpt('enlarge')));
+							if (hasVal('normalizeOrientation')) setBool('normalizeOrientation', Boolean(getOpt('normalizeOrientation')));
+							if (hasVal('cropX')) setNumber('cropX', Number(getOpt('cropX')));
+							if (hasVal('cropY')) setNumber('cropY', Number(getOpt('cropY')));
+							if (hasVal('cropWidth')) setNumber('cropWidth', Number(getOpt('cropWidth')));
+							if (hasVal('cropHeight')) setNumber('cropHeight', Number(getOpt('cropHeight')));
+							if (hasVal('backgroundColor')) setString('backgroundColor', String(getOpt('backgroundColor')));
+							if (hasVal('rotate')) setNumber('rotate', Number(getOpt('rotate')));
+							if (hasVal('flipH')) setBool('flipH', Boolean(getOpt('flipH')));
+							if (hasVal('flipV')) setBool('flipV', Boolean(getOpt('flipV')));
+							if (hasVal('colorSpace')) formData.colorSpace = String(getOpt('colorSpace'));
+							if (hasVal('targetSizeKB')) setNumber('targetSizeKB', Number(getOpt('targetSizeKB')));
+							if (hasVal('quality')) setNumber('quality', Number(getOpt('quality')));
+							if (hasVal('keepMetadata')) setBool('keepMetadata', Boolean(getOpt('keepMetadata')));
+							if (hasVal('blur')) setNumber('blur', Number(getOpt('blur')));
+							if (hasVal('sharpen')) setNumber('sharpen', Number(getOpt('sharpen')));
+							if (hasVal('grayscale')) setBool('grayscale', Boolean(getOpt('grayscale')));
+							if (hasVal('sepia')) setBool('sepia', Boolean(getOpt('sepia')));
+							if (hasVal('brightness')) setNumber('brightness', Number(getOpt('brightness')));
+							if (hasVal('contrast')) setNumber('contrast', Number(getOpt('contrast')));
+							if (hasVal('saturation')) setNumber('saturation', Number(getOpt('saturation')));
+							if (hasVal('pad')) setNumber('pad', Number(getOpt('pad')));
+							if (hasVal('padTop')) setNumber('padTop', Number(getOpt('padTop')));
+							if (hasVal('padRight')) setNumber('padRight', Number(getOpt('padRight')));
+							if (hasVal('padBottom')) setNumber('padBottom', Number(getOpt('padBottom')));
+							if (hasVal('padLeft')) setNumber('padLeft', Number(getOpt('padLeft')));
+							if (hasVal('padColor')) setString('padColor', String(getOpt('padColor')));
+							if (hasVal('borderRadius')) setNumber('borderRadius', Number(getOpt('borderRadius')));
+							if (hasVal('border')) setNumber('border', Number(getOpt('border')));
+							if (hasVal('borderColor')) setString('borderColor', String(getOpt('borderColor')));
+							if (hasVal('backgroundBlur')) setNumber('backgroundBlur', Number(getOpt('backgroundBlur')));
+							if (hasVal('watermarkText')) setString('watermarkText', String(getOpt('watermarkText')));
+							if (hasVal('watermarkFontSize')) setNumber('watermarkFontSize', Number(getOpt('watermarkFontSize')));
+							if (hasVal('watermarkColor')) setString('watermarkColor', String(getOpt('watermarkColor')));
+							if (hasVal('watermarkOpacity')) setNumber('watermarkOpacity', Number(getOpt('watermarkOpacity')));
+							if (hasVal('watermarkPosition')) formData.watermarkPosition = String(getOpt('watermarkPosition'));
+							if (hasVal('watermarkMargin')) setNumber('watermarkMargin', Number(getOpt('watermarkMargin')));
+							if (hasVal('watermarkScale')) setNumber('watermarkScale', Number(getOpt('watermarkScale')));
+							if (hasVal('pdfMode')) formData.pdfMode = String(getOpt('pdfMode'));
+							if (hasVal('pdfPageSize')) formData.pdfPageSize = String(getOpt('pdfPageSize'));
+							if (hasVal('pdfOrientation')) formData.pdfOrientation = String(getOpt('pdfOrientation'));
+							if (hasVal('pdfMargin')) setNumber('pdfMargin', Number(getOpt('pdfMargin')));
+							if (hasVal('pdfEmbedFormat')) formData.pdfEmbedFormat = String(getOpt('pdfEmbedFormat'));
+							if (hasVal('pdfJpegQuality')) setNumber('pdfJpegQuality', Number(getOpt('pdfJpegQuality')));
+							if (hasVal('includeRawExif')) setBool('includeRawExif', Boolean(getOpt('includeRawExif')));
+
+							const watermarkProp = this.getNodeParameter('watermarkBinaryProperty', itemIndex, '') as string;
+							if (watermarkProp) await includeWatermarkFile(watermarkProp);
 							break;
 						}
 					}
@@ -1430,10 +1331,10 @@ export class DavixH2I implements INodeType {
 
 				// ---- TOOLS (multipart)
 					if (resource === 'tools') {
-						const action = operation as ToolsAction;
-						const toolsBinaryProps = this.getNodeParameter('toolsBinaryProps', itemIndex) as string;
-						const formData: Record<string, any> = { action };
-						await attachFiles('images', toolsBinaryProps, formData);
+					const action = operation as ToolsAction;
+					const toolsBinaryProps = this.getNodeParameter('toolsBinaryProps', itemIndex) as string;
+					const formData: Record<string, any> = { action };
+					await attachFiles('images', toolsBinaryProps, formData);
 
 					const setString = (name: string, value: string) => {
 						if (value) formData[name] = value;
@@ -1457,63 +1358,39 @@ export class DavixH2I implements INodeType {
 						formData.tools = tools.join(',');
 					}
 
+					const toolOptions = (this.getNodeParameter('options', itemIndex, {}) as IDataObject) || {};
+					const hasOpt = (key: string) => Object.prototype.hasOwnProperty.call(toolOptions, key);
+					const getOpt = (key: string) => toolOptions[key];
 					const hasTool = (toolName: string) => selectedTools.includes(toolName);
 
 					if (hasTool('metadata')) {
-						const val = action === 'single'
-							? (this.getNodeParameter('includeRawExif', itemIndex) as boolean)
-							: (this.getNodeParameter('multiIncludeRawExif', itemIndex) as boolean);
-						setBool('includeRawExif', val);
+						if (hasOpt('includeRawExif')) setBool('includeRawExif', Boolean(getOpt('includeRawExif')));
 					}
 
 					if (hasTool('palette')) {
-						const val = action === 'single'
-							? (this.getNodeParameter('paletteSize', itemIndex) as number)
-							: (this.getNodeParameter('multiPaletteSize', itemIndex) as number);
-						setNumber('paletteSize', val);
+						if (hasOpt('paletteSize')) setNumber('paletteSize', Number(getOpt('paletteSize')));
 					}
 
 					if (hasTool('hash')) {
-						const val = action === 'single'
-							? (this.getNodeParameter('hashType', itemIndex) as string)
-							: (this.getNodeParameter('multiHashType', itemIndex) as string);
-						setString('hashType', val);
+						if (hasOpt('hashType')) setString('hashType', String(getOpt('hashType')));
 					}
 
 					if (hasTool('quality')) {
-						const val = action === 'single'
-							? (this.getNodeParameter('qualitySample', itemIndex) as number)
-							: (this.getNodeParameter('multiQualitySample', itemIndex) as number);
-						setNumber('qualitySample', val);
+						if (hasOpt('qualitySample')) setNumber('qualitySample', Number(getOpt('qualitySample')));
 					}
 
 					if (hasTool('transparency')) {
-						const val = action === 'single'
-							? (this.getNodeParameter('transparencySample', itemIndex) as number)
-							: (this.getNodeParameter('multiTransparencySample', itemIndex) as number);
-						setNumber('transparencySample', val);
+						if (hasOpt('transparencySample')) setNumber('transparencySample', Number(getOpt('transparencySample')));
 					}
 
 					if (hasTool('similarity')) {
-						const mode = action === 'single'
-							? (this.getNodeParameter('similarityMode', itemIndex) as string)
-							: (this.getNodeParameter('multiSimilarityMode', itemIndex) as string);
-						const threshold = action === 'single'
-							? (this.getNodeParameter('similarityThreshold', itemIndex) as number)
-							: (this.getNodeParameter('multiSimilarityThreshold', itemIndex) as number);
-						setString('similarityMode', mode);
-						setNumber('similarityThreshold', threshold);
+						if (hasOpt('similarityMode')) setString('similarityMode', String(getOpt('similarityMode')));
+						if (hasOpt('similarityThreshold')) setNumber('similarityThreshold', Number(getOpt('similarityThreshold')));
 					}
 
 					if (hasTool('efficiency')) {
-						const format = action === 'single'
-							? (this.getNodeParameter('efficiencyFormat', itemIndex) as string)
-							: (this.getNodeParameter('multiEfficiencyFormat', itemIndex) as string);
-						const quality = action === 'single'
-							? (this.getNodeParameter('efficiencyQuality', itemIndex) as number)
-							: (this.getNodeParameter('multiEfficiencyQuality', itemIndex) as number);
-						setString('efficiencyFormat', format);
-						setNumber('efficiencyQuality', quality);
+						if (hasOpt('efficiencyFormat')) setString('efficiencyFormat', String(getOpt('efficiencyFormat')));
+						if (hasOpt('efficiencyQuality')) setNumber('efficiencyQuality', Number(getOpt('efficiencyQuality')));
 					}
 
 					const response = await davixRequest.call(this, {
