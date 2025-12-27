@@ -290,7 +290,7 @@ export class DavixH2I implements INodeType {
 						{ name: 'SVG', value: 'svg' },
 						{ name: 'PDF', value: 'pdf' },
 					],
-					displayOptions: { show: { resource: ['image'] } },
+					displayOptions: { show: { resource: ['image'] }, hide: { operation: ['multitask'] } },
 				},
 				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
 				{ displayName: 'Height', name: 'imageHeight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
@@ -307,7 +307,18 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Display P3', value: 'display-p3' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
 				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
-				{ displayName: 'Keep Metadata', name: 'keepMetadata', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['format', 'resize', 'crop', 'transform', 'compress', 'enhance', 'padding', 'frame', 'background', 'watermark', 'pdf', 'multitask', 'metadata'] } } },
+				{
+					displayName: 'Keep Metadata',
+					name: 'keepMetadata',
+					type: 'boolean',
+					default: false,
+					displayOptions: {
+						show: {
+							resource: ['image'],
+							operation: ['format', 'resize', 'crop', 'transform', 'compress', 'enhance', 'padding', 'frame', 'background', 'watermark', 'pdf', 'metadata'],
+						},
+					},
+				},
 				{ displayName: 'Blur', name: 'blur', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
 				{ displayName: 'Sharpen', name: 'sharpen', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
 				{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
@@ -455,6 +466,22 @@ export class DavixH2I implements INodeType {
 				},
 
 				// Conditional image fields for multitask
+				{
+					displayName: 'Format',
+					name: 'multiFormat',
+					type: 'options',
+					default: 'webp',
+					options: [
+						{ name: 'JPEG', value: 'jpeg' },
+						{ name: 'PNG', value: 'png' },
+						{ name: 'WebP', value: 'webp' },
+						{ name: 'AVIF', value: 'avif' },
+						{ name: 'GIF', value: 'gif' },
+						{ name: 'SVG', value: 'svg' },
+						{ name: 'PDF', value: 'pdf' },
+					],
+					displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['format'] } },
+				},
 				{ displayName: 'Width', name: 'multiWidth', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['width'] } } },
 				{ displayName: 'Height', name: 'multiHeight', type: 'number', default: 0, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['height'] } } },
 				{ displayName: 'Enlarge', name: 'multiEnlarge', type: 'boolean', default: false, displayOptions: { show: { resource: ['image'], operation: ['multitask'], imageMultitaskOptions: ['enlarge'] } } },
@@ -787,6 +814,12 @@ export class DavixH2I implements INodeType {
 						{ name: 'Detect Format', value: 'detect-format' },
 						{ name: 'Orientation', value: 'orientation' },
 						{ name: 'Hash', value: 'hash' },
+						{ name: 'Similarity', value: 'similarity' },
+						{ name: 'Dimensions', value: 'dimensions' },
+						{ name: 'Palette', value: 'palette' },
+						{ name: 'Transparency', value: 'transparency' },
+						{ name: 'Quality', value: 'quality' },
+						{ name: 'Efficiency', value: 'efficiency' },
 					],
 					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
 				},
@@ -801,24 +834,12 @@ export class DavixH2I implements INodeType {
 						{ name: 'Detect Format', value: 'detect-format' },
 						{ name: 'Orientation', value: 'orientation' },
 						{ name: 'Hash', value: 'hash' },
-					],
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'] } },
-				},
-				{
-					displayName: 'Multitask Options',
-					name: 'toolsMultitaskOptions',
-					type: 'multiOptions',
-					default: [],
-					options: [
-						{ name: 'Include Raw EXIF', value: 'includeRawExif' },
-						{ name: 'Palette Size', value: 'paletteSize' },
-						{ name: 'Hash Type', value: 'hashType' },
-						{ name: 'Quality Sample', value: 'qualitySample' },
-						{ name: 'Transparency Sample', value: 'transparencySample' },
-						{ name: 'Similarity Mode', value: 'similarityMode' },
-						{ name: 'Similarity Threshold', value: 'similarityThreshold' },
-						{ name: 'Efficiency Format', value: 'efficiencyFormat' },
-						{ name: 'Efficiency Quality', value: 'efficiencyQuality' },
+						{ name: 'Similarity', value: 'similarity' },
+						{ name: 'Dimensions', value: 'dimensions' },
+						{ name: 'Palette', value: 'palette' },
+						{ name: 'Transparency', value: 'transparency' },
+						{ name: 'Quality', value: 'quality' },
+						{ name: 'Efficiency', value: 'efficiency' },
 					],
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'] } },
 				},
@@ -827,28 +848,28 @@ export class DavixH2I implements INodeType {
 					name: 'includeRawExif',
 					type: 'boolean',
 					default: false,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['metadata'] } },
 				},
 				{
 					displayName: 'Include Raw EXIF',
 					name: 'multiIncludeRawExif',
 					type: 'boolean',
 					default: false,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['includeRawExif'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['metadata'] } },
 				},
 				{
 					displayName: 'Palette Size',
 					name: 'paletteSize',
 					type: 'number',
 					default: 5,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['palette'] } },
 				},
 				{
 					displayName: 'Palette Size',
 					name: 'multiPaletteSize',
 					type: 'number',
 					default: 5,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['paletteSize'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['palette'] } },
 				},
 				{
 					displayName: 'Hash Type',
@@ -860,7 +881,7 @@ export class DavixH2I implements INodeType {
 						{ name: 'MD5', value: 'md5' },
 						{ name: 'SHA1', value: 'sha1' },
 					],
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['hash'] } },
 				},
 				{
 					displayName: 'Hash Type',
@@ -872,91 +893,91 @@ export class DavixH2I implements INodeType {
 						{ name: 'MD5', value: 'md5' },
 						{ name: 'SHA1', value: 'sha1' },
 					],
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['hashType'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['hash'] } },
 				},
 				{
 					displayName: 'Quality Sample',
 					name: 'qualitySample',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['quality'] } },
 				},
 				{
 					displayName: 'Quality Sample',
 					name: 'multiQualitySample',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['qualitySample'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['quality'] } },
 				},
 				{
 					displayName: 'Transparency Sample',
 					name: 'transparencySample',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['transparency'] } },
 				},
 				{
 					displayName: 'Transparency Sample',
 					name: 'multiTransparencySample',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['transparencySample'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['transparency'] } },
 				},
 				{
 					displayName: 'Similarity Mode',
 					name: 'similarityMode',
 					type: 'string',
 					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
 				},
 				{
 					displayName: 'Similarity Mode',
 					name: 'multiSimilarityMode',
 					type: 'string',
 					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['similarityMode'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
 				},
 				{
 					displayName: 'Similarity Threshold',
 					name: 'similarityThreshold',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
 				},
 				{
 					displayName: 'Similarity Threshold',
 					name: 'multiSimilarityThreshold',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['similarityThreshold'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
 				},
 				{
 					displayName: 'Efficiency Format',
 					name: 'efficiencyFormat',
 					type: 'string',
 					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['efficiency'] } },
 				},
 				{
 					displayName: 'Efficiency Format',
 					name: 'multiEfficiencyFormat',
 					type: 'string',
 					default: '',
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['efficiencyFormat'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['efficiency'] } },
 				},
 				{
 					displayName: 'Efficiency Quality',
 					name: 'efficiencyQuality',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['single'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['efficiency'] } },
 				},
 				{
 					displayName: 'Efficiency Quality',
 					name: 'multiEfficiencyQuality',
 					type: 'number',
 					default: 0,
-					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], toolsMultitaskOptions: ['efficiencyQuality'] } },
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['efficiency'] } },
 				},
 			],
 		};
@@ -1204,9 +1225,9 @@ export class DavixH2I implements INodeType {
 							setBool('includeRawExif', this.getNodeParameter('includeRawExif', itemIndex) as boolean);
 							break;
 						case 'multitask': {
-							formData.format = format;
 							const options = this.getNodeParameter('imageMultitaskOptions', itemIndex) as string[];
 							const has = (key: string) => options.includes(key);
+							if (has('format')) setString('format', this.getNodeParameter('multiFormat', itemIndex) as string);
 							if (has('width')) setNumber('width', this.getNodeParameter('multiWidth', itemIndex) as number);
 							if (has('height')) setNumber('height', this.getNodeParameter('multiHeight', itemIndex) as number);
 							if (has('enlarge')) setBool('enlarge', this.getNodeParameter('multiEnlarge', itemIndex) as boolean);
@@ -1408,11 +1429,11 @@ export class DavixH2I implements INodeType {
 				}
 
 				// ---- TOOLS (multipart)
-				if (resource === 'tools') {
-					const action = operation as ToolsAction;
-					const toolsBinaryProps = this.getNodeParameter('toolsBinaryProps', itemIndex) as string;
-					const formData: Record<string, any> = { action };
-					await attachFiles('images', toolsBinaryProps, formData);
+					if (resource === 'tools') {
+						const action = operation as ToolsAction;
+						const toolsBinaryProps = this.getNodeParameter('toolsBinaryProps', itemIndex) as string;
+						const formData: Record<string, any> = { action };
+						await attachFiles('images', toolsBinaryProps, formData);
 
 					const setString = (name: string, value: string) => {
 						if (value) formData[name] = value;
@@ -1424,27 +1445,76 @@ export class DavixH2I implements INodeType {
 						formData[name] = toBoolString(value);
 					};
 
+					let selectedTools: string[] = [];
 					if (action === 'single') {
 						const tool = this.getNodeParameter('tool', itemIndex) as string;
 						if (!tool) throw new Error('Select one tool for single action.');
+						selectedTools = [tool];
 						formData.tools = tool;
 					} else {
 						const tools = this.getNodeParameter('tools', itemIndex) as string[];
+						selectedTools = tools;
 						formData.tools = tools.join(',');
 					}
 
-					const options = action === 'multitask' ? (this.getNodeParameter('toolsMultitaskOptions', itemIndex) as string[]) : [];
-					const has = (key: string) => options.includes(key);
+					const hasTool = (toolName: string) => selectedTools.includes(toolName);
 
-					if (action === 'single' || has('includeRawExif')) setBool('includeRawExif', this.getNodeParameter('includeRawExif', itemIndex) as boolean);
-					if (action === 'single' || has('paletteSize')) setNumber('paletteSize', this.getNodeParameter('paletteSize', itemIndex) as number);
-					if (action === 'single' || has('hashType')) setString('hashType', this.getNodeParameter('hashType', itemIndex) as string);
-					if (has('qualitySample')) setNumber('qualitySample', this.getNodeParameter('qualitySample', itemIndex) as number);
-					if (has('transparencySample')) setNumber('transparencySample', this.getNodeParameter('transparencySample', itemIndex) as number);
-					if (has('similarityMode')) setString('similarityMode', this.getNodeParameter('similarityMode', itemIndex) as string);
-					if (has('similarityThreshold')) setNumber('similarityThreshold', this.getNodeParameter('similarityThreshold', itemIndex) as number);
-					if (has('efficiencyFormat')) setString('efficiencyFormat', this.getNodeParameter('efficiencyFormat', itemIndex) as string);
-					if (has('efficiencyQuality')) setNumber('efficiencyQuality', this.getNodeParameter('efficiencyQuality', itemIndex) as number);
+					if (hasTool('metadata')) {
+						const val = action === 'single'
+							? (this.getNodeParameter('includeRawExif', itemIndex) as boolean)
+							: (this.getNodeParameter('multiIncludeRawExif', itemIndex) as boolean);
+						setBool('includeRawExif', val);
+					}
+
+					if (hasTool('palette')) {
+						const val = action === 'single'
+							? (this.getNodeParameter('paletteSize', itemIndex) as number)
+							: (this.getNodeParameter('multiPaletteSize', itemIndex) as number);
+						setNumber('paletteSize', val);
+					}
+
+					if (hasTool('hash')) {
+						const val = action === 'single'
+							? (this.getNodeParameter('hashType', itemIndex) as string)
+							: (this.getNodeParameter('multiHashType', itemIndex) as string);
+						setString('hashType', val);
+					}
+
+					if (hasTool('quality')) {
+						const val = action === 'single'
+							? (this.getNodeParameter('qualitySample', itemIndex) as number)
+							: (this.getNodeParameter('multiQualitySample', itemIndex) as number);
+						setNumber('qualitySample', val);
+					}
+
+					if (hasTool('transparency')) {
+						const val = action === 'single'
+							? (this.getNodeParameter('transparencySample', itemIndex) as number)
+							: (this.getNodeParameter('multiTransparencySample', itemIndex) as number);
+						setNumber('transparencySample', val);
+					}
+
+					if (hasTool('similarity')) {
+						const mode = action === 'single'
+							? (this.getNodeParameter('similarityMode', itemIndex) as string)
+							: (this.getNodeParameter('multiSimilarityMode', itemIndex) as string);
+						const threshold = action === 'single'
+							? (this.getNodeParameter('similarityThreshold', itemIndex) as number)
+							: (this.getNodeParameter('multiSimilarityThreshold', itemIndex) as number);
+						setString('similarityMode', mode);
+						setNumber('similarityThreshold', threshold);
+					}
+
+					if (hasTool('efficiency')) {
+						const format = action === 'single'
+							? (this.getNodeParameter('efficiencyFormat', itemIndex) as string)
+							: (this.getNodeParameter('multiEfficiencyFormat', itemIndex) as string);
+						const quality = action === 'single'
+							? (this.getNodeParameter('efficiencyQuality', itemIndex) as number)
+							: (this.getNodeParameter('multiEfficiencyQuality', itemIndex) as number);
+						setString('efficiencyFormat', format);
+						setNumber('efficiencyQuality', quality);
+					}
 
 					const response = await davixRequest.call(this, {
 						method: 'POST',
