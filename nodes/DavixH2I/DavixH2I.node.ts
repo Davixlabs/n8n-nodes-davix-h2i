@@ -1053,6 +1053,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'phash',
 					description: 'Hash algorithm to compute.',
+					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['hash'] } },
 					options: [
 						{ name: 'pHash', value: 'phash' },
 						{ name: 'MD5', value: 'md5' },
@@ -1129,6 +1130,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'phash',
 					description: 'Hash algorithm to compute.',
+					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['hash'] } },
 					options: [
 						{ name: 'pHash', value: 'phash' },
 						{ name: 'MD5', value: 'md5' },
