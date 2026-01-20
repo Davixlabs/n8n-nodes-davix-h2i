@@ -214,11 +214,11 @@ export class DavixH2I implements INodeType {
 					displayOptions: { show: { resource: ['h2i'], operation: ['image'] } },
 				},
 				{
-					displayName: 'PDF Page Size',
-					name: 'h2iPdfPageSize',
+					displayName: 'PDF Format',
+					name: 'pdfFormat',
 					type: 'options',
 					default: 'auto',
-					description: 'Page size when rendering HTML to PDF.',
+					description: 'Page size/format when rendering HTML to PDF.',
 					options: [
 						{ name: 'Auto', value: 'auto' },
 						{ name: 'A4', value: 'a4' },
@@ -227,43 +227,43 @@ export class DavixH2I implements INodeType {
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
-					displayName: 'PDF Orientation',
-					name: 'h2iPdfOrientation',
-					type: 'options',
-					default: 'portrait',
-					description: 'PDF orientation for H2I PDF output.',
-					options: [
-						{ name: 'Portrait', value: 'portrait' },
-						{ name: 'Landscape', value: 'landscape' },
-					],
+					displayName: 'PDF Landscape',
+					name: 'pdfLandscape',
+					type: 'boolean',
+					default: false,
+					description: 'Render PDF in landscape orientation.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
-					displayName: 'PDF Margin',
-					name: 'h2iPdfMargin',
+					displayName: 'Prefer CSS Page Size',
+					name: 'preferCSSPageSize',
+					type: 'boolean',
+					default: false,
+					description: 'Prefer @page CSS size over the provided PDF format.',
+					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
+				},
+				{
+					displayName: 'Scale',
+					name: 'scale',
 					type: 'number',
-					default: 0,
-					description: 'Page margin in pixels for H2I PDF.',
+					default: 1,
+					description: 'Scale factor for rendering HTML to PDF.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
-					displayName: 'PDF Embed Format',
-					name: 'h2iPdfEmbedFormat',
-					type: 'options',
-					default: 'png',
-					description: 'Image format embedded inside the generated PDF.',
-					options: [
-						{ name: 'PNG', value: 'png' },
-						{ name: 'JPEG', value: 'jpeg' },
-					],
+					displayName: 'Print Mode',
+					name: 'printMode',
+					type: 'boolean',
+					default: false,
+					description: 'Enable print mode for rendering HTML to PDF.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
-					displayName: 'PDF JPEG Quality',
-					name: 'h2iPdfJpegQuality',
-					type: 'number',
-					default: 85,
-					description: 'JPEG quality used when embedding images into the PDF.',
+					displayName: 'Print Background',
+					name: 'printBackground',
+					type: 'boolean',
+					default: true,
+					description: 'Print background graphics and colors.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -430,7 +430,7 @@ export class DavixH2I implements INodeType {
 					type: 'number',
 					default: 0,
 					description: 'Margin (in pixels) applied to the exported PDF pages.',
-					displayOptions: { show: { resource: ['image'], operation: ['pdf'] } },
+					displayOptions: { show: { resource: ['image', 'h2i'], operation: ['pdf'] } },
 				},
 				{
 					displayName: 'PDF Embed Format',
@@ -474,7 +474,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Format',
-					name: 'multitaskFormat',
+					name: 'format',
 					type: 'options',
 					default: 'webp',
 					description: 'Output format for the multitask result.',
@@ -497,7 +497,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Keep Metadata',
-					name: 'multitaskKeepMetadata',
+					name: 'keepMetadata',
 					type: 'boolean',
 					default: false,
 					description: 'Preserve EXIF/metadata for the multitask request when possible.',
@@ -511,7 +511,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Width',
-					name: 'multitaskWidth',
+					name: 'width',
 					type: 'number',
 					default: 0,
 					description: 'Resize width in pixels.',
@@ -519,7 +519,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Height',
-					name: 'multitaskHeight',
+					name: 'height',
 					type: 'number',
 					default: 0,
 					description: 'Resize height in pixels.',
@@ -527,7 +527,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Enlarge',
-					name: 'multitaskEnlarge',
+					name: 'enlarge',
 					type: 'boolean',
 					default: false,
 					description: 'Allow upscaling when resizing.',
@@ -535,7 +535,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Normalize Orientation',
-					name: 'multitaskNormalizeOrientation',
+					name: 'normalizeOrientation',
 					type: 'boolean',
 					default: false,
 					description: 'Auto-rotate based on EXIF orientation.',
@@ -543,7 +543,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Crop X',
-					name: 'multitaskCropX',
+					name: 'cropX',
 					type: 'number',
 					default: 0,
 					description: 'Left offset for crop.',
@@ -551,7 +551,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Crop Y',
-					name: 'multitaskCropY',
+					name: 'cropY',
 					type: 'number',
 					default: 0,
 					description: 'Top offset for crop.',
@@ -559,7 +559,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Crop Width',
-					name: 'multitaskCropWidth',
+					name: 'cropWidth',
 					type: 'number',
 					default: 0,
 					description: 'Crop width in pixels.',
@@ -567,7 +567,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Crop Height',
-					name: 'multitaskCropHeight',
+					name: 'cropHeight',
 					type: 'number',
 					default: 0,
 					description: 'Crop height in pixels.',
@@ -575,7 +575,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Background Color',
-					name: 'multitaskBackgroundColor',
+					name: 'backgroundColor',
 					type: 'string',
 					default: '',
 					description: 'Background color for crop, compress, or background actions.',
@@ -583,7 +583,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Rotate (degrees)',
-					name: 'multitaskRotate',
+					name: 'rotate',
 					type: 'number',
 					default: 0,
 					description: 'Rotate image by degrees.',
@@ -591,7 +591,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Flip Horizontal',
-					name: 'multitaskFlipH',
+					name: 'flipH',
 					type: 'boolean',
 					default: false,
 					description: 'Flip image horizontally.',
@@ -599,7 +599,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Flip Vertical',
-					name: 'multitaskFlipV',
+					name: 'flipV',
 					type: 'boolean',
 					default: false,
 					description: 'Flip image vertically.',
@@ -607,7 +607,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Color Space',
-					name: 'multitaskColorSpace',
+					name: 'colorSpace',
 					type: 'options',
 					default: 'srgb',
 					description: 'Color space to use for transforms or compression.',
@@ -619,7 +619,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Target Size (KB)',
-					name: 'multitaskTargetSizeKB',
+					name: 'targetSizeKB',
 					type: 'number',
 					default: 0,
 					description: 'Target output size in KB for compression (optional).',
@@ -627,7 +627,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Quality',
-					name: 'multitaskQuality',
+					name: 'quality',
 					type: 'number',
 					default: 82,
 					description: 'Compression quality (1-100).',
@@ -635,7 +635,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Blur',
-					name: 'multitaskBlur',
+					name: 'blur',
 					type: 'number',
 					default: 0,
 					description: 'Apply blur radius (0 to skip).',
@@ -643,7 +643,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Sharpen',
-					name: 'multitaskSharpen',
+					name: 'sharpen',
 					type: 'number',
 					default: 0,
 					description: 'Sharpen amount (0 to skip).',
@@ -651,7 +651,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Grayscale',
-					name: 'multitaskGrayscale',
+					name: 'grayscale',
 					type: 'boolean',
 					default: false,
 					description: 'Convert image to grayscale.',
@@ -659,7 +659,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Sepia',
-					name: 'multitaskSepia',
+					name: 'sepia',
 					type: 'boolean',
 					default: false,
 					description: 'Apply sepia tone.',
@@ -667,7 +667,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Brightness',
-					name: 'multitaskBrightness',
+					name: 'brightness',
 					type: 'number',
 					default: 0,
 					description: 'Adjust brightness (-100 to 100).',
@@ -675,7 +675,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Contrast',
-					name: 'multitaskContrast',
+					name: 'contrast',
 					type: 'number',
 					default: 0,
 					description: 'Adjust contrast (-100 to 100).',
@@ -683,7 +683,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Saturation',
-					name: 'multitaskSaturation',
+					name: 'saturation',
 					type: 'number',
 					default: 0,
 					description: 'Adjust saturation (-100 to 100).',
@@ -691,7 +691,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Pad',
-					name: 'multitaskPad',
+					name: 'pad',
 					type: 'number',
 					default: 0,
 					description: 'Uniform padding size.',
@@ -699,7 +699,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Pad Color',
-					name: 'multitaskPadColor',
+					name: 'padColor',
 					type: 'string',
 					default: '',
 					description: 'Padding color (e.g. #ffffff).',
@@ -707,7 +707,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Border',
-					name: 'multitaskBorder',
+					name: 'border',
 					type: 'number',
 					default: 0,
 					description: 'Border thickness in pixels.',
@@ -715,7 +715,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Border Color',
-					name: 'multitaskBorderColor',
+					name: 'borderColor',
 					type: 'string',
 					default: '',
 					description: 'Border color (e.g. #000000).',
@@ -723,7 +723,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Border Radius',
-					name: 'multitaskBorderRadius',
+					name: 'borderRadius',
 					type: 'number',
 					default: 0,
 					description: 'Rounded corner radius.',
@@ -731,7 +731,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Background Blur',
-					name: 'multitaskBackgroundBlur',
+					name: 'backgroundBlur',
 					type: 'number',
 					default: 0,
 					description: 'Blur background by this radius.',
@@ -739,7 +739,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Text',
-					name: 'multitaskWatermarkText',
+					name: 'watermarkText',
 					type: 'string',
 					default: '',
 					description: 'Text watermark to overlay.',
@@ -747,7 +747,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Font Size',
-					name: 'multitaskWatermarkFontSize',
+					name: 'watermarkFontSize',
 					type: 'number',
 					default: 24,
 					description: 'Font size for text watermark.',
@@ -755,7 +755,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Color',
-					name: 'multitaskWatermarkColor',
+					name: 'watermarkColor',
 					type: 'string',
 					default: '#000000',
 					description: 'Text watermark color.',
@@ -763,7 +763,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Opacity',
-					name: 'multitaskWatermarkOpacity',
+					name: 'watermarkOpacity',
 					type: 'number',
 					default: 0.35,
 					description: 'Watermark opacity between 0 and 1.',
@@ -771,7 +771,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Position',
-					name: 'multitaskWatermarkPosition',
+					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
 					options: [
@@ -786,7 +786,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Margin',
-					name: 'multitaskWatermarkMargin',
+					name: 'watermarkMargin',
 					type: 'number',
 					default: 8,
 					description: 'Margin/padding around watermark.',
@@ -794,7 +794,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Scale',
-					name: 'multitaskWatermarkScale',
+					name: 'watermarkScale',
 					type: 'number',
 					default: 1,
 					description: 'Scale factor for watermark size.',
@@ -802,7 +802,7 @@ export class DavixH2I implements INodeType {
 				},
 				{
 					displayName: 'Watermark Image Binary Property',
-					name: 'multitaskWatermarkImageBinaryProperty',
+					name: 'watermarkImageBinaryProp',
 					type: 'string',
 					default: '',
 					placeholder: 'watermarkImage',
@@ -815,7 +815,7 @@ export class DavixH2I implements INodeType {
 					name: 'imageDownloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'Download the first returned URL into binary data (results remain in JSON).',
+					description: 'Download the returned URL(s) into binary data (results remain in JSON).',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -965,7 +965,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfDownloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'If enabled, download the first URL result into a binary property.',
+					description: 'If enabled, download all URL results into binary properties.',
 					displayOptions: { show: { resource: ['pdf'] } },
 				},
 				{
@@ -1196,15 +1196,19 @@ export class DavixH2I implements INodeType {
 				const resource = this.getNodeParameter('resource', itemIndex) as Resource;
 				const operation = this.getNodeParameter('operation', itemIndex) as string;
 
-				const gatherFirstUrl = (response: any): string | undefined => {
-					if (typeof response?.url === 'string') return String(response.url);
+				const gatherAllUrls = (response: any): string[] => {
+					const urls: string[] = [];
+					if (typeof response?.url === 'string') urls.push(String(response.url));
 					if (Array.isArray(response?.results)) {
 						for (const r of response.results) {
-							if (r?.url) return String(r.url);
-							if (typeof r === 'string') return r;
+							if (typeof r === 'string') {
+								urls.push(r);
+							} else if (r?.url) {
+								urls.push(String(r.url));
+							}
 						}
 					}
-					return undefined;
+					return urls;
 				};
 
 				const attachFiles = async (
@@ -1262,11 +1266,13 @@ export class DavixH2I implements INodeType {
 					if (action === 'image') {
 						body.format = this.getNodeParameter('format', itemIndex) as string;
 					} else {
-						body.pdfPageSize = this.getNodeParameter('h2iPdfPageSize', itemIndex) as string;
-						body.pdfOrientation = this.getNodeParameter('h2iPdfOrientation', itemIndex) as string;
-						body.pdfMargin = this.getNodeParameter('h2iPdfMargin', itemIndex) as number;
-						body.pdfEmbedFormat = this.getNodeParameter('h2iPdfEmbedFormat', itemIndex) as string;
-						body.pdfJpegQuality = this.getNodeParameter('h2iPdfJpegQuality', itemIndex) as number;
+						body.pdfFormat = this.getNodeParameter('pdfFormat', itemIndex) as string;
+						body.pdfLandscape = this.getNodeParameter('pdfLandscape', itemIndex) as boolean;
+						body.pdfMargin = this.getNodeParameter('pdfMargin', itemIndex) as number;
+						body.preferCSSPageSize = this.getNodeParameter('preferCSSPageSize', itemIndex) as boolean;
+						body.scale = this.getNodeParameter('scale', itemIndex) as number;
+						body.printMode = this.getNodeParameter('printMode', itemIndex) as boolean;
+						body.printBackground = this.getNodeParameter('printBackground', itemIndex) as boolean;
 					}
 
 					const response = await davixRequest.call(this, {
@@ -1278,12 +1284,13 @@ export class DavixH2I implements INodeType {
 
 					const downloadBinary = this.getNodeParameter('downloadBinary', itemIndex) as boolean;
 					if (downloadBinary) {
-						const firstUrl = gatherFirstUrl(response);
-						if (!firstUrl) throw new Error('No URL returned to download.');
+						const urls = gatherAllUrls(response);
+						if (urls.length === 0) throw new Error('No URL returned to download.');
 						const binName = this.getNodeParameter('outputBinaryProperty', itemIndex) as string;
+						const url = urls[0];
 						const dl = await downloadToBinary.call(
 							this,
-							firstUrl,
+							url,
 							action === 'pdf' ? 'h2i.pdf' : `h2i.${(body.format as string) === 'jpeg' ? 'jpg' : body.format ?? 'png'}`,
 						);
 						const binary = await this.helpers.prepareBinaryData(dl.data, dl.fileName, dl.mimeType);
@@ -1444,90 +1451,90 @@ export class DavixH2I implements INodeType {
 								if (value !== undefined && value !== null && formData[name] === undefined) formData[name] = toBoolString(value);
 							};
 
-							setStringOnce('format', this.getNodeParameter('multitaskFormat', itemIndex) as string);
-							setBoolOnce('keepMetadata', this.getNodeParameter('multitaskKeepMetadata', itemIndex) as boolean);
+							setStringOnce('format', this.getNodeParameter('format', itemIndex) as string);
+							setBoolOnce('keepMetadata', this.getNodeParameter('keepMetadata', itemIndex) as boolean);
 
 							for (const a of selectedActions) {
 								switch (a) {
 									case 'format':
 										{
-											setNumberOnce('width', this.getNodeParameter('multitaskWidth', itemIndex) as number);
-											setNumberOnce('height', this.getNodeParameter('multitaskHeight', itemIndex) as number);
+											setNumberOnce('width', this.getNodeParameter('width', itemIndex) as number);
+											setNumberOnce('height', this.getNodeParameter('height', itemIndex) as number);
 										}
 										break;
 									case 'resize':
 										{
-											setNumberOnce('width', this.getNodeParameter('multitaskWidth', itemIndex) as number);
-											setNumberOnce('height', this.getNodeParameter('multitaskHeight', itemIndex) as number);
-											setBoolOnce('enlarge', this.getNodeParameter('multitaskEnlarge', itemIndex) as boolean);
-											setBoolOnce('normalizeOrientation', this.getNodeParameter('multitaskNormalizeOrientation', itemIndex) as boolean);
+											setNumberOnce('width', this.getNodeParameter('width', itemIndex) as number);
+											setNumberOnce('height', this.getNodeParameter('height', itemIndex) as number);
+											setBoolOnce('enlarge', this.getNodeParameter('enlarge', itemIndex) as boolean);
+											setBoolOnce('normalizeOrientation', this.getNodeParameter('normalizeOrientation', itemIndex) as boolean);
 										}
 										break;
 									case 'crop':
 										{
-											setNumberOnce('cropX', this.getNodeParameter('multitaskCropX', itemIndex) as number);
-											setNumberOnce('cropY', this.getNodeParameter('multitaskCropY', itemIndex) as number);
-											setNumberOnce('cropWidth', this.getNodeParameter('multitaskCropWidth', itemIndex) as number);
-											setNumberOnce('cropHeight', this.getNodeParameter('multitaskCropHeight', itemIndex) as number);
-											setBoolOnce('normalizeOrientation', this.getNodeParameter('multitaskNormalizeOrientation', itemIndex) as boolean);
-											setStringOnce('backgroundColor', this.getNodeParameter('multitaskBackgroundColor', itemIndex) as string);
+											setNumberOnce('cropX', this.getNodeParameter('cropX', itemIndex) as number);
+											setNumberOnce('cropY', this.getNodeParameter('cropY', itemIndex) as number);
+											setNumberOnce('cropWidth', this.getNodeParameter('cropWidth', itemIndex) as number);
+											setNumberOnce('cropHeight', this.getNodeParameter('cropHeight', itemIndex) as number);
+											setBoolOnce('normalizeOrientation', this.getNodeParameter('normalizeOrientation', itemIndex) as boolean);
+											setStringOnce('backgroundColor', this.getNodeParameter('backgroundColor', itemIndex) as string);
 										}
 										break;
 									case 'transform':
 										{
-											setNumberOnce('rotate', this.getNodeParameter('multitaskRotate', itemIndex) as number);
-											setBoolOnce('flipH', this.getNodeParameter('multitaskFlipH', itemIndex) as boolean);
-											setBoolOnce('flipV', this.getNodeParameter('multitaskFlipV', itemIndex) as boolean);
-											setStringOnce('colorSpace', this.getNodeParameter('multitaskColorSpace', itemIndex) as string);
+											setNumberOnce('rotate', this.getNodeParameter('rotate', itemIndex) as number);
+											setBoolOnce('flipH', this.getNodeParameter('flipH', itemIndex) as boolean);
+											setBoolOnce('flipV', this.getNodeParameter('flipV', itemIndex) as boolean);
+											setStringOnce('colorSpace', this.getNodeParameter('colorSpace', itemIndex) as string);
 										}
 										break;
 									case 'compress':
 										{
-											setNumberOnce('quality', this.getNodeParameter('multitaskQuality', itemIndex) as number);
-											setNumberOnce('targetSizeKB', this.getNodeParameter('multitaskTargetSizeKB', itemIndex) as number);
-											setStringOnce('backgroundColor', this.getNodeParameter('multitaskBackgroundColor', itemIndex) as string);
-											setStringOnce('colorSpace', this.getNodeParameter('multitaskColorSpace', itemIndex) as string);
+											setNumberOnce('quality', this.getNodeParameter('quality', itemIndex) as number);
+											setNumberOnce('targetSizeKB', this.getNodeParameter('targetSizeKB', itemIndex) as number);
+											setStringOnce('backgroundColor', this.getNodeParameter('backgroundColor', itemIndex) as string);
+											setStringOnce('colorSpace', this.getNodeParameter('colorSpace', itemIndex) as string);
 										}
 										break;
 									case 'enhance':
 										{
-											setNumberOnce('blur', this.getNodeParameter('multitaskBlur', itemIndex) as number);
-											setNumberOnce('sharpen', this.getNodeParameter('multitaskSharpen', itemIndex) as number);
-											setBoolOnce('grayscale', this.getNodeParameter('multitaskGrayscale', itemIndex) as boolean);
-											setBoolOnce('sepia', this.getNodeParameter('multitaskSepia', itemIndex) as boolean);
-											setNumberOnce('brightness', this.getNodeParameter('multitaskBrightness', itemIndex) as number);
-											setNumberOnce('contrast', this.getNodeParameter('multitaskContrast', itemIndex) as number);
-											setNumberOnce('saturation', this.getNodeParameter('multitaskSaturation', itemIndex) as number);
-											setBoolOnce('normalizeOrientation', this.getNodeParameter('multitaskNormalizeOrientation', itemIndex) as boolean);
+											setNumberOnce('blur', this.getNodeParameter('blur', itemIndex) as number);
+											setNumberOnce('sharpen', this.getNodeParameter('sharpen', itemIndex) as number);
+											setBoolOnce('grayscale', this.getNodeParameter('grayscale', itemIndex) as boolean);
+											setBoolOnce('sepia', this.getNodeParameter('sepia', itemIndex) as boolean);
+											setNumberOnce('brightness', this.getNodeParameter('brightness', itemIndex) as number);
+											setNumberOnce('contrast', this.getNodeParameter('contrast', itemIndex) as number);
+											setNumberOnce('saturation', this.getNodeParameter('saturation', itemIndex) as number);
+											setBoolOnce('normalizeOrientation', this.getNodeParameter('normalizeOrientation', itemIndex) as boolean);
 										}
 										break;
 									case 'frame':
 										{
-											setNumberOnce('pad', this.getNodeParameter('multitaskPad', itemIndex) as number);
-											setStringOnce('padColor', this.getNodeParameter('multitaskPadColor', itemIndex) as string);
-											setNumberOnce('border', this.getNodeParameter('multitaskBorder', itemIndex) as number);
-											setStringOnce('borderColor', this.getNodeParameter('multitaskBorderColor', itemIndex) as string);
-											setNumberOnce('borderRadius', this.getNodeParameter('multitaskBorderRadius', itemIndex) as number);
+											setNumberOnce('pad', this.getNodeParameter('pad', itemIndex) as number);
+											setStringOnce('padColor', this.getNodeParameter('padColor', itemIndex) as string);
+											setNumberOnce('border', this.getNodeParameter('border', itemIndex) as number);
+											setStringOnce('borderColor', this.getNodeParameter('borderColor', itemIndex) as string);
+											setNumberOnce('borderRadius', this.getNodeParameter('borderRadius', itemIndex) as number);
 										}
 										break;
 									case 'background':
 										{
-											setStringOnce('backgroundColor', this.getNodeParameter('multitaskBackgroundColor', itemIndex) as string);
-											setNumberOnce('backgroundBlur', this.getNodeParameter('multitaskBackgroundBlur', itemIndex) as number);
-											setNumberOnce('borderRadius', this.getNodeParameter('multitaskBorderRadius', itemIndex) as number);
-											setStringOnce('padColor', this.getNodeParameter('multitaskPadColor', itemIndex) as string);
+											setStringOnce('backgroundColor', this.getNodeParameter('backgroundColor', itemIndex) as string);
+											setNumberOnce('backgroundBlur', this.getNodeParameter('backgroundBlur', itemIndex) as number);
+											setNumberOnce('borderRadius', this.getNodeParameter('borderRadius', itemIndex) as number);
+											setStringOnce('padColor', this.getNodeParameter('padColor', itemIndex) as string);
 										}
 										break;
 									case 'watermark':
 										{
-											setStringOnce('watermarkText', this.getNodeParameter('multitaskWatermarkText', itemIndex) as string);
-											setNumberOnce('watermarkOpacity', this.getNodeParameter('multitaskWatermarkOpacity', itemIndex) as number);
-											formData.watermarkPosition = formData.watermarkPosition ?? (this.getNodeParameter('multitaskWatermarkPosition', itemIndex) as string);
-											setNumberOnce('watermarkMargin', this.getNodeParameter('multitaskWatermarkMargin', itemIndex) as number);
-											setNumberOnce('watermarkScale', this.getNodeParameter('multitaskWatermarkScale', itemIndex) as number);
-											setStringOnce('watermarkColor', this.getNodeParameter('multitaskWatermarkColor', itemIndex) as string);
-											setNumberOnce('watermarkFontSize', this.getNodeParameter('multitaskWatermarkFontSize', itemIndex) as number);
-											await includeWatermarkFile(this.getNodeParameter('multitaskWatermarkImageBinaryProperty', itemIndex) as string);
+											setStringOnce('watermarkText', this.getNodeParameter('watermarkText', itemIndex) as string);
+											setNumberOnce('watermarkOpacity', this.getNodeParameter('watermarkOpacity', itemIndex) as number);
+											formData.watermarkPosition = formData.watermarkPosition ?? (this.getNodeParameter('watermarkPosition', itemIndex) as string);
+											setNumberOnce('watermarkMargin', this.getNodeParameter('watermarkMargin', itemIndex) as number);
+											setNumberOnce('watermarkScale', this.getNodeParameter('watermarkScale', itemIndex) as number);
+											setStringOnce('watermarkColor', this.getNodeParameter('watermarkColor', itemIndex) as string);
+											setNumberOnce('watermarkFontSize', this.getNodeParameter('watermarkFontSize', itemIndex) as number);
+											await includeWatermarkFile(this.getNodeParameter('watermarkImageBinaryProp', itemIndex) as string);
 										}
 										break;
 								}
@@ -1545,13 +1552,21 @@ export class DavixH2I implements INodeType {
 
 					const downloadBinary = ['metadata'].includes(action) ? false : (this.getNodeParameter('imageDownloadBinary', itemIndex) as boolean);
 					if (downloadBinary) {
-						const firstUrl = gatherFirstUrl(response);
-						if (!firstUrl) throw new Error('No URL returned to download.');
+						const urls = gatherAllUrls(response);
+						if (urls.length === 0) throw new Error('No URL returned to download.');
 						const binName = this.getNodeParameter('imageOutputBinaryProperty', itemIndex) as string;
-						const ext = format === 'jpeg' ? 'jpg' : format;
-						const dl = await downloadToBinary.call(this, firstUrl, `pixlab-image.${ext}`);
-						const binary = await this.helpers.prepareBinaryData(dl.data, dl.fileName, dl.mimeType);
-						out.push({ json: response as any, binary: { [binName]: binary } });
+						const selectedFormat =
+							action === 'multitask'
+								? (this.getNodeParameter('format', itemIndex) as string)
+								: (format as string);
+						const ext = selectedFormat === 'jpeg' ? 'jpg' : selectedFormat;
+						const binaries: Record<string, any> = {};
+						for (let i = 0; i < urls.length; i++) {
+							const name = urls.length === 1 ? binName : `${binName}_${i}`;
+							const dl = await downloadToBinary.call(this, urls[i], `pixlab-image.${ext}`);
+							binaries[name] = await this.helpers.prepareBinaryData(dl.data, dl.fileName, dl.mimeType);
+						}
+						out.push({ json: response as any, binary: binaries });
 					} else {
 						out.push({ json: response as any });
 					}
@@ -1662,12 +1677,16 @@ export class DavixH2I implements INodeType {
 
 					const downloadBinary = this.getNodeParameter('pdfDownloadBinary', itemIndex) as boolean;
 					if (downloadBinary) {
-						const firstUrl = gatherFirstUrl(response);
-						if (!firstUrl) throw new Error('No URL returned to download.');
+						const urls = gatherAllUrls(response);
+						if (urls.length === 0) throw new Error('No URL returned to download.');
 						const binName = this.getNodeParameter('pdfOutputBinaryProperty', itemIndex) as string;
-						const dl = await downloadToBinary.call(this, firstUrl, `pixlab-pdf-result.bin`);
-						const binary = await this.helpers.prepareBinaryData(dl.data, dl.fileName, dl.mimeType);
-						out.push({ json: response as any, binary: { [binName]: binary } });
+						const binaries: Record<string, any> = {};
+						for (let i = 0; i < urls.length; i++) {
+							const name = urls.length === 1 ? binName : `${binName}_${i}`;
+							const dl = await downloadToBinary.call(this, urls[i], `pixlab-pdf-result.bin`);
+							binaries[name] = await this.helpers.prepareBinaryData(dl.data, dl.fileName, dl.mimeType);
+						}
+						out.push({ json: response as any, binary: binaries });
 					} else {
 						out.push({ json: response as any });
 					}
