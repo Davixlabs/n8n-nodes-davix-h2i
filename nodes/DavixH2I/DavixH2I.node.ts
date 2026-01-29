@@ -1305,7 +1305,8 @@ export class DavixH2I implements INodeType {
 				if (resource === 'image') {
 					const action = operation as ImageAction;
 					const imageBinaryProps = this.getNodeParameter('imageBinaryProps', itemIndex) as string;
-					const format = this.getNodeParameter('imageFormat', itemIndex) as string;
+					const format =
+						action === 'multitask' ? undefined : (this.getNodeParameter('imageFormat', itemIndex) as string);
 					const formData: Record<string, any> = { action };
 
 					await attachFiles('images', imageBinaryProps, formData);
