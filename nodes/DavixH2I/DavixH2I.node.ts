@@ -217,10 +217,9 @@ export class DavixH2I implements INodeType {
 					displayName: 'PDF Format',
 					name: 'pdfFormat',
 					type: 'options',
-					default: 'auto',
+					default: 'a4',
 					description: 'Page size/format when rendering HTML to PDF.',
 					options: [
-						{ name: 'Auto', value: 'auto' },
 						{ name: 'A4', value: 'a4' },
 						{ name: 'Letter', value: 'letter' },
 					],
@@ -337,7 +336,7 @@ export class DavixH2I implements INodeType {
 					displayOptions: {
 						show: {
 							resource: ['image'],
-							operation: ['format', 'resize', 'crop', 'transform', 'compress', 'enhance', 'padding', 'frame', 'background', 'watermark', 'pdf', 'metadata'],
+							operation: ['format', 'resize', 'crop', 'transform', 'compress', 'enhance', 'padding', 'frame', 'background', 'watermark', 'pdf'],
 						},
 					},
 				},
@@ -877,6 +876,18 @@ export class DavixH2I implements INodeType {
 					displayOptions: { show: { resource: ['pdf'], operation: ['split', 'extract'] } },
 				},
 				{
+					displayName: 'Mode',
+					name: 'mode',
+					type: 'options',
+					default: 'single',
+					description: 'Choose how to extract pages: Single extracts selected pages into one PDF, Multiple extracts each selected page into a separate PDF.',
+					displayOptions: { show: { resource: ['pdf'], operation: ['extract'] } },
+					options: [
+						{ name: 'Single', value: 'single' },
+						{ name: 'Multiple', value: 'multiple' },
+					],
+				},
+				{
 					displayName: 'Pages',
 					name: 'pages',
 					type: 'string',
@@ -954,7 +965,6 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF producer metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Remove existing metadata before applying new fields.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Order (JSON array)', name: 'order', type: 'string', default: '', description: 'JSON array describing new page order (e.g. [2,1,3]).', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
-				{ displayName: 'Mode', name: 'mode', type: 'string', default: 'range', description: 'Extraction mode (e.g. range).', displayOptions: { show: { resource: ['pdf'], operation: ['extract'] } } },
 				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: false, description: 'Flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
 				{ displayName: 'User Password', name: 'userPassword', type: 'string', default: '', description: 'User password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
 				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', default: '', description: 'Owner password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
@@ -1058,6 +1068,7 @@ export class DavixH2I implements INodeType {
 						{ name: 'pHash', value: 'phash' },
 						{ name: 'MD5', value: 'md5' },
 						{ name: 'SHA1', value: 'sha1' },
+						{ name: 'SHA256', value: 'sha256' },
 					],
 				},
 				{
@@ -1135,6 +1146,7 @@ export class DavixH2I implements INodeType {
 						{ name: 'pHash', value: 'phash' },
 						{ name: 'MD5', value: 'md5' },
 						{ name: 'SHA1', value: 'sha1' },
+						{ name: 'SHA256', value: 'sha256' },
 					],
 				},
 				{
@@ -1652,7 +1664,9 @@ export class DavixH2I implements INodeType {
 
 					if (action === 'extract') {
 						setString('pages', this.getNodeParameter('pages', itemIndex) as string);
-						setString('mode', this.getNodeParameter('mode', itemIndex) as string);
+						const modeParam = this.getNodeParameter('mode', itemIndex) as string;
+						const normalizedMode = modeParam === 'range' ? 'single' : modeParam;
+						setString('mode', normalizedMode);
 						setString('prefix', this.getNodeParameter('prefix', itemIndex) as string);
 					}
 
