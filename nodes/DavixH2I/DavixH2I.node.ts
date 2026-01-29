@@ -4,9 +4,9 @@
 	INodeType,
 	INodeTypeDescription,
 	IHttpRequestOptions,
-	NodeOperationError,
 	IDataObject,
 } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
 
 import { davixRequest, downloadToBinary } from './GenericFunctions';
 
