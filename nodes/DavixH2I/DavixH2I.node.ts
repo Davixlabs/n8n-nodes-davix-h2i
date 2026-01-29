@@ -1,11 +1,12 @@
 	import type {
-		IExecuteFunctions,
-		INodeExecutionData,
-		INodeType,
-		INodeTypeDescription,
-		IHttpRequestOptions,
-		IDataObject,
-	} from 'n8n-workflow';
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+	IHttpRequestOptions,
+	NodeOperationError,
+	IDataObject,
+} from 'n8n-workflow';
 
 import { davixRequest, downloadToBinary } from './GenericFunctions';
 
@@ -1203,6 +1204,7 @@ export class DavixH2I implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const out: INodeExecutionData[] = [];
+		const maxUploadBytes = 52_428_800;
 
 			for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 				const resource = this.getNodeParameter('resource', itemIndex) as Resource;
@@ -1252,17 +1254,42 @@ export class DavixH2I implements INodeType {
 					}
 				};
 
-				const attachSingleFile = async (fieldName: string, propName: string, formData: Record<string, any>) => {
-					if (!propName) return;
-					const buffer = await this.helpers.getBinaryDataBuffer(itemIndex, propName);
-					const meta = items[itemIndex].binary?.[propName];
-					const fileName = meta?.fileName ?? fieldName;
-					const mimeType = meta?.mimeType;
-					formData[fieldName] = {
-						value: buffer,
-						options: { filename: fileName, contentType: mimeType },
+					const attachSingleFile = async (fieldName: string, propName: string, formData: Record<string, any>) => {
+						if (!propName) return;
+						const buffer = await this.helpers.getBinaryDataBuffer(itemIndex, propName);
+						const meta = items[itemIndex].binary?.[propName];
+						const fileName = meta?.fileName ?? fieldName;
+						const mimeType = meta?.mimeType;
+						formData[fieldName] = {
+							value: buffer,
+							options: { filename: fileName, contentType: mimeType },
+						};
 					};
-				};
+
+					const checkTotalBinarySize = async (propList: string) => {
+						const names = propList
+							.split(',')
+							.map((s) => s.trim())
+							.filter(Boolean);
+
+						let total = 0;
+						for (const name of names) {
+							const meta = items[itemIndex].binary?.[name];
+							const metaSize = meta?.fileSize ? Number(meta.fileSize) : 0;
+							if (Number.isFinite(metaSize) && metaSize > 0) {
+								total += metaSize;
+							} else {
+								const buffer = await this.helpers.getBinaryDataBuffer(itemIndex, name);
+								total += buffer.length;
+							}
+							if (total > maxUploadBytes) {
+								throw new NodeOperationError(
+									this.getNode(),
+									'Total upload size exceeds 50 MB. Please reduce file size or number of files.',
+								);
+							}
+						}
+					};
 
 				// ---- H2I (JSON)
 				if (resource === 'h2i') {
@@ -1321,6 +1348,7 @@ export class DavixH2I implements INodeType {
 						action === 'multitask' ? undefined : (this.getNodeParameter('imageFormat', itemIndex) as string);
 					const formData: Record<string, any> = { action };
 
+					await checkTotalBinarySize(imageBinaryProps);
 					await attachFiles('images', imageBinaryProps, formData);
 
 					const setNumber = (name: string, value: number) => {
@@ -1593,6 +1621,7 @@ export class DavixH2I implements INodeType {
 
 					const pdfBinaryProps = this.getNodeParameter('pdfBinaryProps', itemIndex) as string;
 					const formData: Record<string, any> = { action };
+					await checkTotalBinarySize(pdfBinaryProps);
 					await attachFiles('files', pdfBinaryProps, formData);
 
 					const setNumber = (name: string, value: number) => {
@@ -1714,6 +1743,7 @@ export class DavixH2I implements INodeType {
 					const action = operation as ToolsAction;
 					const toolsBinaryProps = this.getNodeParameter('toolsBinaryProps', itemIndex) as string;
 					const formData: Record<string, any> = { action };
+					await checkTotalBinarySize(toolsBinaryProps);
 					await attachFiles('images', toolsBinaryProps, formData);
 
 					const setString = (name: string, value: string) => {
