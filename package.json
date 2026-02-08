@@ -1,7 +1,7 @@
 {
-  "name": "n8n-nodes-h2i",
-  "version": "1.5.1",
-  "description": "Davix H2I (PixLab) community node for n8n: H2I, Image, PDF, Tools endpoints",
+  "name": "n8n-nodes-davix-h2i",
+  "version": "1.0.0",
+  "description": "Official n8n community node for Davix H2I, connecting workflows to the PixLab image, PDF, and tools backends.",
   "license": "MIT",
   "repository": {
     "type": "git",
