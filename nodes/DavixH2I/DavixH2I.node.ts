@@ -1659,11 +1659,11 @@ export class DavixH2I implements INodeType {
 					if (action === 'watermark') {
 						setString('pages', this.getNodeParameter('pages', itemIndex) as string);
 						setString('watermarkText', this.getNodeParameter('watermarkText', itemIndex) as string);
-						setNumber('watermarkOpacity', this.getNodeParameter('watermarkOpacity', itemIndex) as number);
-						setString('watermarkPosition', this.getNodeParameter('watermarkPosition', itemIndex) as string);
-						setNumber('watermarkMargin', this.getNodeParameter('watermarkMargin', itemIndex) as number);
-						setNumber('watermarkFontSize', this.getNodeParameter('watermarkFontSize', itemIndex) as number);
-						setString('watermarkColor', this.getNodeParameter('watermarkColor', itemIndex) as string);
+						setNumber('opacity', this.getNodeParameter('watermarkOpacity', itemIndex) as number);
+						setString('position', this.getNodeParameter('watermarkPosition', itemIndex) as string);
+						setNumber('margin', this.getNodeParameter('watermarkMargin', itemIndex) as number);
+						setNumber('fontSize', this.getNodeParameter('watermarkFontSize', itemIndex) as number);
+						setString('color', this.getNodeParameter('watermarkColor', itemIndex) as string);
 						setNumber('watermarkScale', this.getNodeParameter('watermarkScale', itemIndex) as number);
 						await attachSingleFile('watermarkImage', this.getNodeParameter('watermarkImageBinaryProp', itemIndex) as string, formData);
 					}
