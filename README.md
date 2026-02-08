@@ -290,7 +290,7 @@ MIT — see the LICENSE file for details.
 ## Support & Contact
 
 - Website: https://h2i.davix.dev  
-- Project: https://github.com/davix-agency/n8n-nodes-davix-h2i  
+- Project: https://github.com/Davixlabs/n8n-nodes-davix-h2i
 - For issues, open a GitHub issue with details (remove API keys before posting).
 
 ---
