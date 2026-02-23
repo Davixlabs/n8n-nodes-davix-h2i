@@ -238,7 +238,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Prefer CSS Page Size',
 					name: 'preferCSSPageSize',
 					type: 'boolean',
-					default: false,
+					default: true,
 					description: 'Prefer @page CSS size over the provided PDF format.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
@@ -325,7 +325,7 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, description: 'Rotate image by degrees.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
 				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Flip image horizontally.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
 				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Flip image vertically.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Color space to use for transforms/compress.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Display P3', value: 'display-p3' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
+				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Color space to use for transforms/compress.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Grayscale', value: 'grayscale' }, { name: 'CMYK', value: 'cmyk' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
 				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, description: 'Target output size in KB for compression (optional).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, description: 'Compression quality (1-100).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{
@@ -369,6 +369,10 @@ export class DavixH2I implements INodeType {
 					default: 'center',
 						options: [
 							{ name: 'Center', value: 'center' },
+							{ name: 'Top', value: 'top' },
+							{ name: 'Bottom', value: 'bottom' },
+							{ name: 'Left', value: 'left' },
+							{ name: 'Right', value: 'right' },
 							{ name: 'Top Left', value: 'top-left' },
 							{ name: 'Top Right', value: 'top-right' },
 							{ name: 'Bottom Left', value: 'bottom-left' },
@@ -428,7 +432,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'PDF Margin',
 					name: 'pdfMargin',
 					type: 'number',
-					default: 0,
+					default: 24,
 					description: 'Margin (in pixels) applied to the exported PDF pages.',
 					displayOptions: { show: { resource: ['image', 'h2i'], operation: ['pdf'] } },
 				},
@@ -613,7 +617,8 @@ export class DavixH2I implements INodeType {
 					description: 'Color space to use for transforms or compression.',
 					options: [
 						{ name: 'sRGB', value: 'srgb' },
-						{ name: 'Display P3', value: 'display-p3' },
+						{ name: 'Grayscale', value: 'grayscale' },
+						{ name: 'CMYK', value: 'cmyk' },
 					],
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['transform', 'compress'] } },
 				},
@@ -776,6 +781,10 @@ export class DavixH2I implements INodeType {
 					default: 'center',
 					options: [
 						{ name: 'Center', value: 'center' },
+						{ name: 'Top', value: 'top' },
+						{ name: 'Bottom', value: 'bottom' },
+						{ name: 'Left', value: 'left' },
+						{ name: 'Right', value: 'right' },
 						{ name: 'Top Left', value: 'top-left' },
 						{ name: 'Top Right', value: 'top-right' },
 						{ name: 'Bottom Left', value: 'bottom-left' },
@@ -957,7 +966,7 @@ export class DavixH2I implements INodeType {
 					description: 'Binary property containing an image watermark (optional).',
 					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
 				},
-				{ displayName: 'Degrees', name: 'degrees', type: 'number', default: 0, description: 'Rotation angle in degrees.', displayOptions: { show: { resource: ['pdf'], operation: ['rotate'] } } },
+				{ displayName: 'Degrees', name: 'degrees', type: 'options', default: 90, description: 'Rotation angle in degrees.', options: [{ name: '90', value: 90 }, { name: '180', value: 180 }, { name: '270', value: 270 }], displayOptions: { show: { resource: ['pdf'], operation: ['rotate'] } } },
 				{ displayName: 'Title', name: 'title', type: 'string', default: '', description: 'Set PDF title metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Author', name: 'author', type: 'string', default: '', description: 'Set PDF author metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Subject', name: 'subject', type: 'string', default: '', description: 'Set PDF subject metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
@@ -965,8 +974,8 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Creator', name: 'creator', type: 'string', default: '', description: 'Set PDF creator metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF producer metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Remove existing metadata before applying new fields.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Order (JSON array)', name: 'order', type: 'string', default: '', description: 'JSON array describing new page order (e.g. [2,1,3]).', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
-				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: false, description: 'Flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
+				{ displayName: 'Order (CSV or JSON Array)', name: 'order', type: 'string', default: '', description: 'Page order as CSV (e.g. 2,1,3) or JSON array (e.g. [2,1,3]). JSON is converted to CSV before sending.', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
+				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: true, description: 'Flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
 				{ displayName: 'User Password', name: 'userPassword', type: 'string', default: '', description: 'User password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
 				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', default: '', description: 'Owner password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
 				{ displayName: 'Password', name: 'password', type: 'string', default: '', description: 'Password to decrypt PDF.', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
@@ -1076,7 +1085,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Similarity Mode',
 					name: 'similarityModeSingle',
 					type: 'string',
-					default: '',
+					default: 'pairs',
 					description: 'Similarity mode.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
 				},
@@ -1084,7 +1093,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Similarity Threshold',
 					name: 'similarityThresholdSingle',
 					type: 'number',
-					default: 0,
+					default: 8,
 					description: 'Similarity threshold.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
 				},
@@ -1092,7 +1101,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Quality Sample',
 					name: 'qualitySampleSingle',
 					type: 'number',
-					default: 0,
+					default: 256,
 					description: 'Sample size for quality analysis.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['quality'] } },
 				},
@@ -1100,7 +1109,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Transparency Sample',
 					name: 'transparencySampleSingle',
 					type: 'number',
-					default: 0,
+					default: 64,
 					description: 'Sample size for transparency analysis.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['transparency'] } },
 				},
@@ -1154,7 +1163,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Similarity Mode',
 					name: 'similarityModeMulti',
 					type: 'string',
-					default: '',
+					default: 'pairs',
 					description: 'Similarity mode.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
 				},
@@ -1162,7 +1171,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Similarity Threshold',
 					name: 'similarityThresholdMulti',
 					type: 'number',
-					default: 0,
+					default: 8,
 					description: 'Similarity threshold.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
 				},
@@ -1170,7 +1179,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Quality Sample',
 					name: 'qualitySampleMulti',
 					type: 'number',
-					default: 0,
+					default: 256,
 					description: 'Sample size for quality analysis.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['quality'] } },
 				},
@@ -1178,7 +1187,7 @@ export class DavixH2I implements INodeType {
 					displayName: 'Transparency Sample',
 					name: 'transparencySampleMulti',
 					type: 'number',
-					default: 0,
+					default: 64,
 					description: 'Sample size for transparency analysis.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['transparency'] } },
 				},
@@ -1684,7 +1693,29 @@ export class DavixH2I implements INodeType {
 					}
 
 					if (action === 'reorder') {
-						setString('order', this.getNodeParameter('order', itemIndex) as string);
+						const orderRaw = (this.getNodeParameter('order', itemIndex) as string).trim();
+						if (orderRaw) {
+							let orderNormalized = orderRaw;
+							if (orderRaw.startsWith('[') && orderRaw.endsWith(']')) {
+								let parsed: unknown;
+								try {
+									parsed = JSON.parse(orderRaw);
+								} catch {
+									throw new NodeOperationError(this.getNode(), 'Invalid order JSON. Please provide a valid JSON array like [3,1,2].', {
+										itemIndex,
+									});
+								}
+
+								if (!Array.isArray(parsed) || parsed.length === 0 || !parsed.every((v) => Number.isInteger(v) && (v as number) >= 1)) {
+									throw new NodeOperationError(this.getNode(), 'Invalid order array. Use positive integers only, for example [3,1,2].', {
+										itemIndex,
+									});
+								}
+
+								orderNormalized = (parsed as number[]).join(',');
+							}
+							setString('order', orderNormalized);
+						}
 					}
 
 					if (action === 'delete-pages') {
@@ -1764,6 +1795,11 @@ export class DavixH2I implements INodeType {
 						formData.tools = tool;
 					} else {
 						const tools = this.getNodeParameter('tools', itemIndex) as string[];
+						if (tools.length === 0) {
+							throw new NodeOperationError(this.getNode(), 'Please select at least one tool for Multitask.', {
+								itemIndex,
+							});
+						}
 						selectedTools = tools;
 						formData.tools = tools.join(',');
 					}
