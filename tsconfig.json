@@ -10,7 +10,13 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["credentials/**/*.ts", "nodes/**/*.ts"]
+  "include": [
+    "credentials/**/*.ts",
+    "nodes/**/*.ts",
+    "src/index.ts"
+  ]
 }
