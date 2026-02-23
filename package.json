@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Davixlabs/n8n-nodes-davix-h2i"
+    "url": "git+https://github.com/Davixlabs/n8n-nodes-davix-h2i.git"
   },
   "keywords": [
     "n8n-community-node-package",

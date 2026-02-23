@@ -57,12 +57,22 @@ export async function davixRequest(
 		const pixlabMessage = typeof pixlabError?.message === 'string' ? pixlabError.message : undefined;
 		const requestId = typeof pixlabError?.request_id === 'string' ? pixlabError.request_id : undefined;
 
+		const remediation = [
+			'Check that your API key is valid and active.',
+			'Check that the Base URL points to your PixLab instance.',
+			'Check the binary property names configured in the node input.',
+			'Check that total uploaded file size is within the 50 MB limit.',
+			requestId ? `Provide request_id ${requestId} when contacting support.` : undefined,
+		]
+			.filter(Boolean)
+			.join(' ');
+
 		throw new NodeApiError(this.getNode(), error as JsonObject, {
 			message:
 				pixlabCode && pixlabMessage
 					? `${pixlabCode}: ${pixlabMessage}`
 					: pixlabMessage,
-			description: requestId ? `request_id: ${requestId}` : undefined,
+			description: remediation,
 			httpCode: statusCode ? String(statusCode) : undefined,
 		});
 	}
