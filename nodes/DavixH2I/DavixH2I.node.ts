@@ -231,7 +231,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfLandscape',
 					type: 'boolean',
 					default: false,
-					description: 'Render PDF in landscape orientation.',
+					description: 'Whether to render the PDF in landscape orientation.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -239,7 +239,7 @@ export class DavixH2I implements INodeType {
 					name: 'preferCSSPageSize',
 					type: 'boolean',
 					default: true,
-					description: 'Prefer @page CSS size over the provided PDF format.',
+					description: 'Whether to prefer @page CSS size over the provided PDF format.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -255,7 +255,7 @@ export class DavixH2I implements INodeType {
 					name: 'printMode',
 					type: 'boolean',
 					default: false,
-					description: 'Enable print mode for rendering HTML to PDF.',
+					description: 'Whether to enable print mode when rendering HTML to PDF.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -263,7 +263,7 @@ export class DavixH2I implements INodeType {
 					name: 'printBackground',
 					type: 'boolean',
 					default: true,
-					description: 'Print background graphics and colors.',
+					description: 'Whether to print background graphics and colors.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -271,7 +271,7 @@ export class DavixH2I implements INodeType {
 					name: 'downloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'If enabled, downloads the first result URL into a binary property.',
+					description: 'Whether to download the first result URL into a binary property.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -315,16 +315,16 @@ export class DavixH2I implements INodeType {
 				},
 				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, description: 'Resize width in pixels (0 to auto).', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
 				{ displayName: 'Height', name: 'imageHeight', type: 'number', default: 0, description: 'Resize height in pixels (0 to auto).', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
-				{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, description: 'Allow upscaling when resizing.', displayOptions: { show: { resource: ['image'], operation: ['resize'] } } },
-				{ displayName: 'Normalize Orientation', name: 'normalizeOrientation', type: 'boolean', default: false, description: 'Auto-rotate based on EXIF orientation.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'crop', 'enhance', 'metadata'] } } },
+				{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, description: 'Whether to allow upscaling when resizing.', displayOptions: { show: { resource: ['image'], operation: ['resize'] } } },
+				{ displayName: 'Normalize Orientation', name: 'normalizeOrientation', type: 'boolean', default: false, description: 'Whether to auto-rotate based on EXIF orientation.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'crop', 'enhance', 'metadata'] } } },
 				{ displayName: 'Crop X', name: 'cropX', type: 'number', default: 0, description: 'Left offset for crop (requires crop width/height).', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
 				{ displayName: 'Crop Y', name: 'cropY', type: 'number', default: 0, description: 'Top offset for crop (requires crop width/height).', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
 				{ displayName: 'Crop Width', name: 'cropWidth', type: 'number', default: 0, description: 'Crop width in pixels.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
 				{ displayName: 'Crop Height', name: 'cropHeight', type: 'number', default: 0, description: 'Crop height in pixels.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
 				{ displayName: 'Background Color', name: 'backgroundColor', type: 'string', default: '', description: 'Background color to use for some actions (e.g. crop fill, compress, background).', displayOptions: { show: { resource: ['image'], operation: ['crop', 'compress', 'background'] } } },
 				{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, description: 'Rotate image by degrees.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Flip image horizontally.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Flip image vertically.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Whether to flip the image horizontally.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Whether to flip the image vertically.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
 				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Color space to use for transforms/compress.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Grayscale', value: 'grayscale' }, { name: 'CMYK', value: 'cmyk' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
 				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, description: 'Target output size in KB for compression (optional).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, description: 'Compression quality (1-100).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
@@ -333,7 +333,7 @@ export class DavixH2I implements INodeType {
 					name: 'keepMetadata',
 					type: 'boolean',
 					default: false,
-					description: 'Preserve EXIF/metadata when possible.',
+					description: 'Whether to preserve EXIF/metadata when possible.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -343,8 +343,8 @@ export class DavixH2I implements INodeType {
 				},
 				{ displayName: 'Blur', name: 'blur', type: 'number', default: 0, description: 'Apply blur radius (0 to skip).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
 				{ displayName: 'Sharpen', name: 'sharpen', type: 'number', default: 0, description: 'Sharpen amount (0 to skip).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, description: 'Convert image to grayscale.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Sepia', name: 'sepia', type: 'boolean', default: false, description: 'Apply sepia tone.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, description: 'Whether to convert the image to grayscale.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Sepia', name: 'sepia', type: 'boolean', default: false, description: 'Whether to apply a sepia tone.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
 				{ displayName: 'Brightness', name: 'brightness', type: 'number', default: 0, description: 'Adjust brightness (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
 				{ displayName: 'Contrast', name: 'contrast', type: 'number', default: 0, description: 'Adjust contrast (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
 				{ displayName: 'Saturation', name: 'saturation', type: 'number', default: 0, description: 'Adjust saturation (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
@@ -456,7 +456,7 @@ export class DavixH2I implements INodeType {
 					description: 'JPEG quality used when embedding images into the PDF.',
 					displayOptions: { show: { resource: ['image'], operation: ['pdf'] } },
 				},
-					{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Include raw EXIF data when available.', displayOptions: { show: { resource: ['image'], operation: ['metadata'] } } },
+					{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Whether to include raw EXIF data when available.', displayOptions: { show: { resource: ['image'], operation: ['metadata'] } } },
 				{
 					displayName: 'Actions',
 					name: 'actions',
@@ -504,7 +504,7 @@ export class DavixH2I implements INodeType {
 					name: 'keepMetadata',
 					type: 'boolean',
 					default: false,
-					description: 'Preserve EXIF/metadata for the multitask request when possible.',
+					description: 'Whether to preserve EXIF/metadata for the multitask request when possible.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -534,7 +534,7 @@ export class DavixH2I implements INodeType {
 					name: 'enlarge',
 					type: 'boolean',
 					default: false,
-					description: 'Allow upscaling when resizing.',
+					description: 'Whether to allow upscaling when resizing.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['resize'] } },
 				},
 				{
@@ -542,7 +542,7 @@ export class DavixH2I implements INodeType {
 					name: 'normalizeOrientation',
 					type: 'boolean',
 					default: false,
-					description: 'Auto-rotate based on EXIF orientation.',
+					description: 'Whether to auto-rotate based on EXIF orientation.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['resize', 'crop', 'enhance'] } },
 				},
 				{
@@ -598,7 +598,7 @@ export class DavixH2I implements INodeType {
 					name: 'flipH',
 					type: 'boolean',
 					default: false,
-					description: 'Flip image horizontally.',
+					description: 'Whether to flip the image horizontally.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['transform'] } },
 				},
 				{
@@ -606,7 +606,7 @@ export class DavixH2I implements INodeType {
 					name: 'flipV',
 					type: 'boolean',
 					default: false,
-					description: 'Flip image vertically.',
+					description: 'Whether to flip the image vertically.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['transform'] } },
 				},
 				{
@@ -659,7 +659,7 @@ export class DavixH2I implements INodeType {
 					name: 'grayscale',
 					type: 'boolean',
 					default: false,
-					description: 'Convert image to grayscale.',
+					description: 'Whether to convert the image to grayscale.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -667,7 +667,7 @@ export class DavixH2I implements INodeType {
 					name: 'sepia',
 					type: 'boolean',
 					default: false,
-					description: 'Apply sepia tone.',
+					description: 'Whether to apply a sepia tone.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -824,7 +824,7 @@ export class DavixH2I implements INodeType {
 					name: 'imageDownloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'Download the returned URL(s) into binary data (results remain in JSON).',
+					description: 'Whether to download the returned URL(s) into binary data (results remain in JSON).',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -865,7 +865,7 @@ export class DavixH2I implements INodeType {
 					name: 'sortByName',
 					type: 'boolean',
 					default: false,
-					description: 'When merging, sort uploaded PDFs by filename before merging.',
+					description: 'Whether to sort uploaded PDFs by filename before merging.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['merge'] } },
 				},
 				{
@@ -989,9 +989,9 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Keywords', name: 'keywords', type: 'string', default: '', description: 'Set PDF keywords metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Creator', name: 'creator', type: 'string', default: '', description: 'Set PDF creator metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF producer metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Remove existing metadata before applying new fields.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Whether to remove existing metadata before applying new fields.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Order (CSV or JSON Array)', name: 'order', type: 'string', default: '', description: 'Page order as CSV (e.g. 2,1,3) or JSON array (e.g. [2,1,3]). JSON is converted to CSV before sending.', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
-				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: true, description: 'Flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
+				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: true, description: 'Whether to flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
 				{ displayName: 'User Password', name: 'userPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'User password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
 				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'Owner password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
 				{ displayName: 'Password', name: 'password', type: 'string', typeOptions: { password: true }, default: '', description: 'Password to decrypt PDF.', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
@@ -1001,7 +1001,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfDownloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'If enabled, download all URL results into binary properties.',
+					description: 'Whether to download all URL results into binary properties.',
 					displayOptions: { show: { resource: ['pdf'] } },
 				},
 				{
@@ -1072,7 +1072,7 @@ export class DavixH2I implements INodeType {
 					name: 'metadataIncludeRawExifSingle',
 					type: 'boolean',
 					default: false,
-					description: 'Include raw EXIF data when available.',
+					description: 'Whether to include raw EXIF data when available.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['metadata'] } },
 				},
 				{
@@ -1150,7 +1150,7 @@ export class DavixH2I implements INodeType {
 					name: 'metadataIncludeRawExifMulti',
 					type: 'boolean',
 					default: false,
-					description: 'Include raw EXIF data when available.',
+					description: 'Whether to include raw EXIF data when available.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['metadata'] } },
 				},
 				{
