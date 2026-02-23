@@ -2,7 +2,9 @@ import type {
 	IDataObject,
 	IExecuteFunctions,
 	IHttpRequestOptions,
+	JsonObject,
 } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 
 function stripTrailingSlash(url: string): string {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
@@ -35,7 +37,35 @@ export async function davixRequest(
 		},
 	};
 
-	return await this.helpers.request(requestOptions);
+	try {
+		return await this.helpers.request(requestOptions);
+	} catch (error) {
+		const err = error as {
+			statusCode?: number;
+			response?: { statusCode?: number; body?: unknown };
+			error?: unknown;
+		};
+
+		const statusCode = err.statusCode ?? err.response?.statusCode;
+		const responseBody = err.error ?? err.response?.body;
+		const pixlabError =
+			typeof responseBody === 'object' && responseBody !== null
+				? (responseBody as IDataObject)
+				: undefined;
+
+		const pixlabCode = typeof pixlabError?.code === 'string' ? pixlabError.code : undefined;
+		const pixlabMessage = typeof pixlabError?.message === 'string' ? pixlabError.message : undefined;
+		const requestId = typeof pixlabError?.request_id === 'string' ? pixlabError.request_id : undefined;
+
+		throw new NodeApiError(this.getNode(), error as JsonObject, {
+			message:
+				pixlabCode && pixlabMessage
+					? `${pixlabCode}: ${pixlabMessage}`
+					: pixlabMessage,
+			description: requestId ? `request_id: ${requestId}` : undefined,
+			httpCode: statusCode ? String(statusCode) : undefined,
+		});
+	}
 }
 
 export async function downloadToBinary(
