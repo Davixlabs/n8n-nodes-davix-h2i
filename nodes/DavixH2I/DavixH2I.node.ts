@@ -992,9 +992,9 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Remove existing metadata before applying new fields.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Order (CSV or JSON Array)', name: 'order', type: 'string', default: '', description: 'Page order as CSV (e.g. 2,1,3) or JSON array (e.g. [2,1,3]). JSON is converted to CSV before sending.', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
 				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: true, description: 'Flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
-				{ displayName: 'User Password', name: 'userPassword', type: 'string', default: '', description: 'User password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
-				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', default: '', description: 'Owner password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
-				{ displayName: 'Password', name: 'password', type: 'string', default: '', description: 'Password to decrypt PDF.', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
+				{ displayName: 'User Password', name: 'userPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'User password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
+				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'Owner password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
+				{ displayName: 'Password', name: 'password', type: 'string', typeOptions: { password: true }, default: '', description: 'Password to decrypt PDF.', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
 
 				{
 					displayName: 'Download Result(s) as Binary',
