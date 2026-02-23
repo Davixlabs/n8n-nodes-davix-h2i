@@ -955,6 +955,22 @@ export class DavixH2I implements INodeType {
 					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
 				},
 				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{
+					displayName: 'Watermark X',
+					name: 'watermarkX',
+					type: 'number',
+					default: 0,
+					description: 'Optional X offset for watermark positioning. Sent as x when non-zero.',
+					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
+				},
+				{
+					displayName: 'Watermark Y',
+					name: 'watermarkY',
+					type: 'number',
+					default: 0,
+					description: 'Optional Y offset for watermark positioning. Sent as y when non-zero.',
+					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
+				},
 				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Scale factor for watermark.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
@@ -1666,11 +1682,16 @@ export class DavixH2I implements INodeType {
 					}
 
 					if (action === 'watermark') {
+						const watermarkX = this.getNodeParameter('watermarkX', itemIndex) as number;
+						const watermarkY = this.getNodeParameter('watermarkY', itemIndex) as number;
+
 						setString('pages', this.getNodeParameter('pages', itemIndex) as string);
 						setString('watermarkText', this.getNodeParameter('watermarkText', itemIndex) as string);
 						setNumber('opacity', this.getNodeParameter('watermarkOpacity', itemIndex) as number);
 						setString('position', this.getNodeParameter('watermarkPosition', itemIndex) as string);
 						setNumber('margin', this.getNodeParameter('watermarkMargin', itemIndex) as number);
+						setNumber('x', watermarkX);
+						setNumber('y', watermarkY);
 						setNumber('fontSize', this.getNodeParameter('watermarkFontSize', itemIndex) as number);
 						setString('color', this.getNodeParameter('watermarkColor', itemIndex) as string);
 						setNumber('watermarkScale', this.getNodeParameter('watermarkScale', itemIndex) as number);
