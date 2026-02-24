@@ -27,7 +27,7 @@ jobs:
       - run: npm run build
       - run: npm test
       - run: npm pack --dry-run
-      - run: npx @n8n/scan-community-package n8n-nodes-davix-h2i
+      - run: npx @n8n/scan-community-package "$(node -p \"require('./package.json').name\")"
 
   publish:
     runs-on: ubuntu-latest
