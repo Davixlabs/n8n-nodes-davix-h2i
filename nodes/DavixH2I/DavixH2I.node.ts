@@ -368,7 +368,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
-					description: 'Choose watermark placement for PDF watermark action. Start with center or corner positions for predictable layout. e.g. top-right.',
+						description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
 						options: [
 							{ name: 'Center', value: 'center' },
 							{ name: 'Top', value: 'top' },
@@ -380,7 +380,6 @@ export class DavixH2I implements INodeType {
 							{ name: 'Bottom Left', value: 'bottom-left' },
 							{ name: 'Bottom Right', value: 'bottom-right' },
 						],
-						description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
 						displayOptions: { show: { resource: ['image'], operation: ['watermark'] } },
 					},
 				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, description: 'Set spacing around watermark placement in pixels. Increase to pull marks away from edges. e.g. 16.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
@@ -782,7 +781,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
-					description: 'Choose watermark placement for PDF watermark action. Start with center or corner positions for predictable layout. e.g. top-right.',
+						description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
 					options: [
 						{ name: 'Center', value: 'center' },
 						{ name: 'Top', value: 'top' },
@@ -794,9 +793,8 @@ export class DavixH2I implements INodeType {
 						{ name: 'Bottom Left', value: 'bottom-left' },
 						{ name: 'Bottom Right', value: 'bottom-right' },
 					],
-					description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
-					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
-				},
+						displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
+					},
 				{
 					displayName: 'Watermark Margin',
 					name: 'watermarkMargin',
@@ -1239,7 +1237,8 @@ export class DavixH2I implements INodeType {
 		const out: INodeExecutionData[] = [];
 		const maxUploadBytes = 52_428_800;
 
-			for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+			try {
 				const resource = this.getNodeParameter('resource', itemIndex) as Resource;
 				const operation = this.getNodeParameter('operation', itemIndex) as string;
 
@@ -1911,8 +1910,26 @@ export class DavixH2I implements INodeType {
 					out.push({ json: response as any });
 					continue;
 				}
-			}
 
-			return [out];
+				throw new NodeOperationError(this.getNode(), `Unsupported resource: ${resource}`);
+			} catch (error) {
+				if (this.continueOnFail()) {
+					const err = error as { message?: string; description?: string; httpCode?: string };
+					out.push({
+						json: {
+							error: err.message || 'Unknown error',
+							...(err.description ? { description: err.description } : {}),
+							...(err.httpCode ? { httpCode: err.httpCode } : {}),
+						},
+						pairedItem: { item: itemIndex },
+					});
+					continue;
+				}
+
+				throw error;
+			}
 		}
+
+		return [out];
 	}
+}
