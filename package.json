@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/Davixlabs/n8n-nodes-davix-h2i.git"
   },
+  "bugs": {
+    "url": "https://github.com/Davixlabs/n8n-nodes-davix-h2i/issues"
+  },
   "keywords": [
     "n8n-community-node-package",
     "n8n",
