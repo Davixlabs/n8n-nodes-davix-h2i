@@ -74,7 +74,7 @@ export class DavixH2I implements INodeType {
 					name: 'resource',
 					type: 'options',
 					default: 'h2i',
-					description: 'Choose which PixLab endpoint to call (H2I, Image, PDF, or Tools). Sends action-specific parameters to that resource.',
+					description: 'Choose which PixLab API group this node calls so only matching operations and fields are shown. Pick H2I for HTML rendering, Image for image edits, PDF for PDF tools, or Tools for analysis. e.g. PDF (Merge/Split/Compress/Convert).',
 					options: [
 						{ name: 'H2I (HTML → Image)', value: 'h2i' },
 						{ name: 'Image (Transform / Export PDF)', value: 'image' },
@@ -90,7 +90,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'image',
 					displayOptions: { show: { resource: ['h2i'] } },
-					description: 'Select the PixLab H2I action. The node sends action=image or action=pdf accordingly.',
+					description: 'Select whether H2I returns an image or a PDF from your HTML. This sets the action sent to /v1/h2i and controls which render fields appear. e.g. Render HTML to PDF.',
 					options: [
 						{ name: 'Render HTML to Image', value: 'image' },
 						{ name: 'Render HTML to PDF', value: 'pdf' },
@@ -104,7 +104,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'format',
 					displayOptions: { show: { resource: ['image'] } },
-					description: 'Select the PixLab Image action to run (sent as action=<value>).',
+					description: 'Select the image-processing action to send to /v1/image. Choose the action that matches the transform you need, then fill only that action’s fields. e.g. Resize.',
 					options: [
 						{ name: 'Format', value: 'format' },
 						{ name: 'Resize', value: 'resize' },
@@ -129,7 +129,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'merge',
 					displayOptions: { show: { resource: ['pdf'] } },
-					description: 'Select the PixLab PDF action to run (sent as action=<value>).',
+					description: 'Select the PDF action to send to /v1/pdf. Choose based on your goal (merge, split, convert, watermark, and so on), then provide the required page or password fields. e.g. to-images.',
 					options: [
 						{ name: 'To Images', value: 'to-images' },
 						{ name: 'Merge', value: 'merge' },
@@ -155,7 +155,7 @@ export class DavixH2I implements INodeType {
 					type: 'options',
 					default: 'single',
 					displayOptions: { show: { resource: ['tools'] } },
-					description: 'Select whether to run one tool or multiple tools in a single PixLab Tools request.',
+					description: 'Select whether /v1/tools runs one analyzer or several in one request. Use Single for one tool, or Multitask to combine tools as a CSV list. e.g. Multitask.',
 					options: [
 						{ name: 'Single Tool', value: 'single' },
 						{ name: 'Multitask', value: 'multitask' },
@@ -173,7 +173,7 @@ export class DavixH2I implements INodeType {
 					required: true,
 					typeOptions: { rows: 6 },
 					placeholder: '<div>Hello</div>',
-					description: 'HTML markup to render via PixLab H2I.',
+					description: 'Enter the full HTML string to render with H2I. Keep content within API limits (large HTML can fail) and include complete markup needed for final output. e.g. <div style="padding:24px">Invoice #1001</div>.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -183,7 +183,7 @@ export class DavixH2I implements INodeType {
 					default: '',
 					typeOptions: { rows: 4 },
 					placeholder: 'body { background: #fff; }',
-					description: 'Optional CSS styles applied to the HTML before rendering.',
+					description: 'Enter CSS injected as a style block before rendering your HTML. Leave empty if styles are already inline or embedded. e.g. body { font-family: Arial; background: #ffffff; }.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -191,7 +191,7 @@ export class DavixH2I implements INodeType {
 					name: 'width',
 					type: 'number',
 					default: 1000,
-					description: 'Output width in pixels.',
+					description: 'Set the target render width in pixels for H2I output. PixLab may clamp oversized values to allowed limits. e.g. 1000.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -199,7 +199,7 @@ export class DavixH2I implements INodeType {
 					name: 'height',
 					type: 'number',
 					default: 1500,
-					description: 'Output height in pixels.',
+					description: 'Set the target render height in pixels for H2I output. PixLab may clamp oversized values or reject renders that are too large. e.g. 1500.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -207,7 +207,7 @@ export class DavixH2I implements INodeType {
 					name: 'format',
 					type: 'options',
 					default: 'png',
-					description: 'Image format when rendering HTML to an image.',
+					description: 'Choose the image format for H2I image output. Use png for lossless output or jpeg for smaller lossy output. e.g. PNG.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -219,7 +219,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfFormat',
 					type: 'options',
 					default: 'a4',
-					description: 'Page size/format when rendering HTML to PDF.',
+					description: 'Choose the page size used when H2I action is PDF. A4 is default and Letter maps to US Letter on the API side. e.g. A4.',
 					options: [
 						{ name: 'A4', value: 'a4' },
 						{ name: 'Letter', value: 'letter' },
@@ -231,7 +231,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfLandscape',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to render the PDF in landscape orientation.',
+					description: 'Whether to render PDF pages in landscape orientation instead of portrait. Leave off for standard portrait documents. e.g. enabled for wide dashboards.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -239,7 +239,7 @@ export class DavixH2I implements INodeType {
 					name: 'preferCSSPageSize',
 					type: 'boolean',
 					default: true,
-					description: 'Whether to prefer @page CSS size over the provided PDF format.',
+					description: 'Whether to prefer CSS @page sizing from your HTML instead of the selected PDF Format value. Turn off to force the dropdown page size. e.g. enabled when your template defines @page { size: A5; }.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -247,7 +247,7 @@ export class DavixH2I implements INodeType {
 					name: 'scale',
 					type: 'number',
 					default: 1,
-					description: 'Scale factor for rendering HTML to PDF.',
+					description: 'Set the PDF render scale multiplier for HTML content. Use values near 1; higher values enlarge content and may increase render size. e.g. 1.0.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -255,7 +255,7 @@ export class DavixH2I implements INodeType {
 					name: 'printMode',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to enable print mode when rendering HTML to PDF.',
+					description: 'Whether to emulate print media CSS during PDF rendering. Enable if your template uses @media print rules. e.g. enabled for print-specific styles.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -263,7 +263,7 @@ export class DavixH2I implements INodeType {
 					name: 'printBackground',
 					type: 'boolean',
 					default: true,
-					description: 'Whether to print background graphics and colors.',
+					description: 'Whether to include background colors and images in the generated PDF. Disable for ink-saving, text-focused output. e.g. enabled for branded reports.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -271,7 +271,7 @@ export class DavixH2I implements INodeType {
 					name: 'downloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to download the first result URL into a binary property.',
+					description: 'Whether to download the first returned signed URL and attach it as n8n binary data. Disable to keep only JSON response fields such as url and request_id. e.g. enabled to pass the file to another node.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -279,7 +279,8 @@ export class DavixH2I implements INodeType {
 					name: 'outputBinaryProperty',
 					type: 'string',
 					default: 'data',
-					description: 'Name of the binary property to store the downloaded file.',
+					placeholder: 'data',
+					description: 'Set the binary property name used when the downloaded file is attached to the item. Use a short stable key referenced by downstream nodes. e.g. data.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'], downloadBinary: [true] } },
 				},
 
@@ -293,7 +294,7 @@ export class DavixH2I implements INodeType {
 					default: 'data',
 					placeholder: 'data OR image1,image2',
 					description:
-						'Comma-separated binary properties containing images to upload (e.g. data,image1). Each entry is sent as an images file.',
+						'Provide incoming image binary property names as a comma-separated list. Use the name of the incoming binary property that contains the file, usually ‘data’ unless you renamed it. e.g. data,image1.',
 						displayOptions: { show: { resource: ['image'] } },
 					},
 				{
@@ -301,7 +302,7 @@ export class DavixH2I implements INodeType {
 					name: 'imageFormat',
 					type: 'options',
 					default: 'webp',
-					description: 'Output image format for non-multitask actions.',
+					description: 'Choose output format for image actions other than multitask. The value is sent as format and may affect quality/size trade-offs. e.g. webp.',
 					options: [
 						{ name: 'JPEG', value: 'jpeg' },
 						{ name: 'PNG', value: 'png' },
@@ -313,27 +314,27 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['image'] }, hide: { operation: ['multitask'] } },
 				},
-				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, description: 'Resize width in pixels (0 to auto).', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
-				{ displayName: 'Height', name: 'imageHeight', type: 'number', default: 0, description: 'Resize height in pixels (0 to auto).', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
-				{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, description: 'Whether to allow upscaling when resizing.', displayOptions: { show: { resource: ['image'], operation: ['resize'] } } },
-				{ displayName: 'Normalize Orientation', name: 'normalizeOrientation', type: 'boolean', default: false, description: 'Whether to auto-rotate based on EXIF orientation.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'crop', 'enhance', 'metadata'] } } },
-				{ displayName: 'Crop X', name: 'cropX', type: 'number', default: 0, description: 'Left offset for crop (requires crop width/height).', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Crop Y', name: 'cropY', type: 'number', default: 0, description: 'Top offset for crop (requires crop width/height).', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Crop Width', name: 'cropWidth', type: 'number', default: 0, description: 'Crop width in pixels.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Crop Height', name: 'cropHeight', type: 'number', default: 0, description: 'Crop height in pixels.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
-				{ displayName: 'Background Color', name: 'backgroundColor', type: 'string', default: '', description: 'Background color to use for some actions (e.g. crop fill, compress, background).', displayOptions: { show: { resource: ['image'], operation: ['crop', 'compress', 'background'] } } },
-				{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, description: 'Rotate image by degrees.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Whether to flip the image horizontally.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Whether to flip the image vertically.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Color space to use for transforms/compress.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Grayscale', value: 'grayscale' }, { name: 'CMYK', value: 'cmyk' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
-				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, description: 'Target output size in KB for compression (optional).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
-				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, description: 'Compression quality (1-100).', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
+				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, description: 'Set output width in pixels for resize/format actions. Use 0 to let PixLab auto-calculate from height and aspect ratio. e.g. 1200.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
+				{ displayName: 'Height', name: 'imageHeight', type: 'number', default: 0, description: 'Set output height in pixels for resize/format actions. Use 0 to auto-calculate from width and aspect ratio. e.g. 800.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
+				{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, description: 'Whether to allow enlarging images beyond original dimensions during resize. Keep off to avoid quality loss from upscaling. e.g. disabled for thumbnails.', displayOptions: { show: { resource: ['image'], operation: ['resize'] } } },
+				{ displayName: 'Normalize Orientation', name: 'normalizeOrientation', type: 'boolean', default: false, description: 'Whether to normalize image orientation using EXIF metadata before processing. Enable for photos from phones/cameras that may appear rotated. e.g. enabled for mobile uploads.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'crop', 'enhance', 'metadata'] } } },
+				{ displayName: 'Crop X', name: 'cropX', type: 'number', default: 0, description: 'Set crop start X coordinate in pixels from the left edge. Provide Crop Width and Crop Height so crop fields are applied. e.g. 120.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Crop Y', name: 'cropY', type: 'number', default: 0, description: 'Set crop start Y coordinate in pixels from the top edge. Provide Crop Width and Crop Height so crop fields are applied. e.g. 80.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Crop Width', name: 'cropWidth', type: 'number', default: 0, description: 'Set the crop box width in pixels. Use together with Crop X, Crop Y, and Crop Height for deterministic cropping. e.g. 600.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Crop Height', name: 'cropHeight', type: 'number', default: 0, description: 'Set the crop box height in pixels. Use together with Crop X, Crop Y, and Crop Width for deterministic cropping. e.g. 400.', displayOptions: { show: { resource: ['image'], operation: ['crop'] } } },
+				{ displayName: 'Background Color', name: 'backgroundColor', type: 'string', default: '', description: 'Set the background fill color for actions that support it, using hex or CSS-like color values. Invalid color strings can cause invalid_parameter errors. e.g. #ffffff.', displayOptions: { show: { resource: ['image'], operation: ['crop', 'compress', 'background'] } } },
+				{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, description: 'Set rotation in degrees for transform actions. Use positive or negative values as needed by your layout. e.g. 90.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Whether to mirror the image left-to-right during transform. Combine with rotate when needed. e.g. enabled for selfie correction.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Whether to mirror the image top-to-bottom during transform. Use only when a vertical inversion is required. e.g. enabled for camera rig output.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
+				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Choose output color space for transform/compress actions. cmyk may be rejected depending on PixLab build configuration. e.g. srgb.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Grayscale', value: 'grayscale' }, { name: 'CMYK', value: 'cmyk' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
+				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, description: 'Set target file size in kilobytes for compress action guidance. Leave 0 to skip target-size tuning. e.g. 250.', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
+				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, description: 'Set encoder quality used by compression/output format paths. Higher values keep detail but produce larger files. e.g. 82.', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{
 					displayName: 'Keep Metadata',
 					name: 'keepMetadata',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to preserve EXIF/metadata when possible.',
+					description: 'Whether to keep metadata (such as EXIF) in compatible image outputs. Disable to strip metadata and reduce output size. e.g. disabled for privacy-sensitive files.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -341,32 +342,33 @@ export class DavixH2I implements INodeType {
 						},
 					},
 				},
-				{ displayName: 'Blur', name: 'blur', type: 'number', default: 0, description: 'Apply blur radius (0 to skip).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Sharpen', name: 'sharpen', type: 'number', default: 0, description: 'Sharpen amount (0 to skip).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, description: 'Whether to convert the image to grayscale.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Sepia', name: 'sepia', type: 'boolean', default: false, description: 'Whether to apply a sepia tone.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Brightness', name: 'brightness', type: 'number', default: 0, description: 'Adjust brightness (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Contrast', name: 'contrast', type: 'number', default: 0, description: 'Adjust contrast (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Saturation', name: 'saturation', type: 'number', default: 0, description: 'Adjust saturation (-100 to 100).', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
-				{ displayName: 'Pad', name: 'pad', type: 'number', default: 0, description: 'Uniform padding size.', displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame'] } } },
-				{ displayName: 'Pad Top', name: 'padTop', type: 'number', default: 0, description: 'Top padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Right', name: 'padRight', type: 'number', default: 0, description: 'Right padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Bottom', name: 'padBottom', type: 'number', default: 0, description: 'Bottom padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Left', name: 'padLeft', type: 'number', default: 0, description: 'Left padding (overrides uniform pad).', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
-				{ displayName: 'Pad Color', name: 'padColor', type: 'string', default: '', description: 'Padding color (e.g. #ffffff).', displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame', 'background'] } } },
-				{ displayName: 'Border', name: 'border', type: 'number', default: 0, description: 'Border thickness in pixels.', displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
-				{ displayName: 'Border Color', name: 'borderColor', type: 'string', default: '', description: 'Border color (e.g. #000000).', displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
-				{ displayName: 'Border Radius', name: 'borderRadius', type: 'number', default: 0, description: 'Rounded corner radius.', displayOptions: { show: { resource: ['image'], operation: ['padding', 'background'] } } },
-				{ displayName: 'Background Blur', name: 'backgroundBlur', type: 'number', default: 0, description: 'Blur background by this radius.', displayOptions: { show: { resource: ['image'], operation: ['background'] } } },
-				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', description: 'Text watermark to overlay.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, description: 'Font size for text watermark.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', description: 'Text watermark color.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, description: 'Watermark opacity between 0 and 1.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Blur', name: 'blur', type: 'number', default: 0, description: 'Set blur strength for enhance action; the API clamps to valid range. Use 0 to skip blurring. e.g. 2.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Sharpen', name: 'sharpen', type: 'number', default: 0, description: 'Set sharpen amount for enhance action; the API clamps to valid range. Use 0 to skip sharpening. e.g. 1.5.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Grayscale', name: 'grayscale', type: 'boolean', default: false, description: 'Whether to convert output to grayscale in enhance action. Keep off to preserve color. e.g. enabled for monochrome previews.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Sepia', name: 'sepia', type: 'boolean', default: false, description: 'Whether to apply a sepia color effect in enhance action. Use with moderate contrast/brightness for vintage look. e.g. enabled for retro style.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Brightness', name: 'brightness', type: 'number', default: 0, description: 'Set brightness adjustment value for enhance action. Use small increments and test visually because extreme values can clip detail. e.g. 0.9.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Contrast', name: 'contrast', type: 'number', default: 0, description: 'Set contrast adjustment value for enhance action. Use moderate values to avoid crushed shadows/highlights. e.g. 1.1.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Saturation', name: 'saturation', type: 'number', default: 0, description: 'Set saturation adjustment value for enhance action. Lower values mute color and higher values intensify color. e.g. 1.2.', displayOptions: { show: { resource: ['image'], operation: ['enhance'] } } },
+				{ displayName: 'Pad', name: 'pad', type: 'number', default: 0, description: 'Set uniform padding (pixels) applied to all sides when padding/frame is used. Side-specific values can override this in padding mode. e.g. 24.', displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame'] } } },
+				{ displayName: 'Pad Top', name: 'padTop', type: 'number', default: 0, description: 'Set top padding in pixels for padding action. Use with other side fields for asymmetric spacing. e.g. 10.', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Right', name: 'padRight', type: 'number', default: 0, description: 'Set right padding in pixels for padding action. Use with other side fields for asymmetric spacing. e.g. 20.', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Bottom', name: 'padBottom', type: 'number', default: 0, description: 'Set bottom padding in pixels for padding action. Use with other side fields for asymmetric spacing. e.g. 10.', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Left', name: 'padLeft', type: 'number', default: 0, description: 'Set left padding in pixels for padding action. Use with other side fields for asymmetric spacing. e.g. 20.', displayOptions: { show: { resource: ['image'], operation: ['padding'] } } },
+				{ displayName: 'Pad Color', name: 'padColor', type: 'string', default: '', description: 'Set pad fill color using hex/CSS-like syntax when padding or framing is applied. Leave empty to let API defaults apply where supported. e.g. #ffffff.', displayOptions: { show: { resource: ['image'], operation: ['padding', 'frame', 'background'] } } },
+				{ displayName: 'Border', name: 'border', type: 'number', default: 0, description: 'Set border thickness in pixels for frame action. Use 0 to remove border. e.g. 4.', displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
+				{ displayName: 'Border Color', name: 'borderColor', type: 'string', default: '', description: 'Set border color for frame action using hex/CSS-like color syntax. e.g. #000000.', displayOptions: { show: { resource: ['image'], operation: ['frame'] } } },
+				{ displayName: 'Border Radius', name: 'borderRadius', type: 'number', default: 0, description: 'Set border radius in pixels for rounded corners on frame/background actions. Use 0 for square corners. e.g. 12.', displayOptions: { show: { resource: ['image'], operation: ['padding', 'background'] } } },
+				{ displayName: 'Background Blur', name: 'backgroundBlur', type: 'number', default: 0, description: 'Set background blur strength for background action; API clamps large values. Use 0 to disable blur. e.g. 15.', displayOptions: { show: { resource: ['image'], operation: ['background'] } } },
+				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', description: 'Enter watermark text to overlay for image watermark action. Leave empty if you are using only an image watermark file. e.g. Confidential.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, description: 'Set text watermark font size in pixels. Increase for high-resolution images. e.g. 24.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', description: 'Set text watermark color using hex/CSS-like syntax. e.g. #000000.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, description: 'Set text/image watermark opacity from 0 (transparent) to 1 (solid). Use lower values for subtle marks. e.g. 0.35.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Position',
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
+					description: 'Choose watermark placement for PDF watermark action. Start with center or corner positions for predictable layout. e.g. top-right.',
 						options: [
 							{ name: 'Center', value: 'center' },
 							{ name: 'Top', value: 'top' },
@@ -378,18 +380,18 @@ export class DavixH2I implements INodeType {
 							{ name: 'Bottom Left', value: 'bottom-left' },
 							{ name: 'Bottom Right', value: 'bottom-right' },
 						],
-						description: 'Position for text/image watermark.',
+						description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
 						displayOptions: { show: { resource: ['image'], operation: ['watermark'] } },
 					},
-				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, description: 'Margin/padding around watermark.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Scale factor for watermark size.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, description: 'Set spacing around watermark placement in pixels. Increase to pull marks away from edges. e.g. 16.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Set watermark scaling multiplier for image watermark action. Use 1 for original size and adjust cautiously for readability. e.g. 1.2.', displayOptions: { show: { resource: ['image'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Image Binary Property',
 					name: 'watermarkImageBinaryProp',
 					type: 'string',
 					default: '',
 					placeholder: 'watermarkImage',
-					description: 'Binary property containing an image watermark (optional).',
+					description: 'Use the name of the incoming binary property that contains the watermark image, usually ‘data’ unless you renamed it. Leave empty to use text-only watermark settings. e.g. data.',
 					displayOptions: { show: { resource: ['image'], operation: ['watermark'] } },
 				},
 				{
@@ -397,6 +399,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfMode',
 					type: 'options',
 					default: 'single',
+					description: 'Choose whether image-to-PDF export creates one combined PDF or separate PDFs per input image. Use Multi when you want one output file per image. e.g. single.',
 					options: [
 						{ name: 'Single', value: 'single' },
 						{ name: 'Multi', value: 'multi' },
@@ -408,7 +411,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfPageSize',
 					type: 'options',
 					default: 'auto',
-					description: 'Page size to use when exporting to PDF.',
+					description: 'Choose PDF page size for image-to-PDF export. This is sent as pdfPageSize when action is image→pdf. e.g. A4.',
 					options: [
 						{ name: 'Auto', value: 'auto' },
 						{ name: 'A4', value: 'a4' },
@@ -421,7 +424,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfOrientation',
 					type: 'options',
 					default: 'portrait',
-					description: 'Orientation for pages in the exported PDF.',
+					description: 'Choose page orientation for image-to-PDF export. Use portrait for typical documents and landscape for wide visuals. e.g. portrait.',
 					options: [
 						{ name: 'Portrait', value: 'portrait' },
 						{ name: 'Landscape', value: 'landscape' },
@@ -433,7 +436,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfMargin',
 					type: 'number',
 					default: 24,
-					description: 'Margin (in pixels) applied to the exported PDF pages.',
+					description: 'Set page margin in pixels for image-to-PDF export. Increase to add whitespace around embedded images. e.g. 24.',
 					displayOptions: { show: { resource: ['image', 'h2i'], operation: ['pdf'] } },
 				},
 				{
@@ -441,7 +444,7 @@ export class DavixH2I implements INodeType {
 					name: 'pdfEmbedFormat',
 					type: 'options',
 					default: 'png',
-					description: 'Image format embedded inside the generated PDF.',
+					description: 'Choose the internal image encoding used inside the generated PDF. JPEG is smaller; PNG keeps lossless quality/transparency where supported. e.g. jpeg.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -453,16 +456,16 @@ export class DavixH2I implements INodeType {
 					name: 'pdfJpegQuality',
 					type: 'number',
 					default: 85,
-					description: 'JPEG quality used when embedding images into the PDF.',
+					description: 'Set JPEG quality (commonly 20–100) when PDF embed format is JPEG. Higher values increase quality and file size. e.g. 85.',
 					displayOptions: { show: { resource: ['image'], operation: ['pdf'] } },
 				},
-					{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Whether to include raw EXIF data when available.', displayOptions: { show: { resource: ['image'], operation: ['metadata'] } } },
+					{ displayName: 'Include Raw EXIF', name: 'includeRawExif', type: 'boolean', default: false, description: 'Whether to include raw EXIF blocks in metadata responses when supported. Disable for smaller payloads. e.g. enabled when forensic metadata is needed.', displayOptions: { show: { resource: ['image'], operation: ['metadata'] } } },
 				{
 					displayName: 'Actions',
 					name: 'actions',
 					type: 'multiOptions',
 					default: [],
-					description: 'Select one or more actions. Each action reveals its own parameter group below.',
+					description: 'Select one or more image actions to run in a single multitask request. Fill the shared fields that correspond to the selected actions. e.g. resize + watermark.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'] } },
 					options: [
 						{ name: 'Format', value: 'format' },
@@ -481,7 +484,7 @@ export class DavixH2I implements INodeType {
 					name: 'format',
 					type: 'options',
 					default: 'webp',
-					description: 'Output format for the multitask result.',
+					description: 'Choose output format returned by image multitask processing. Pick a format compatible with your downstream workflow. e.g. png.',
 					options: [
 						{ name: 'JPEG', value: 'jpeg' },
 						{ name: 'PNG', value: 'png' },
@@ -504,7 +507,7 @@ export class DavixH2I implements INodeType {
 					name: 'keepMetadata',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to preserve EXIF/metadata for the multitask request when possible.',
+					description: 'Whether to keep metadata across multitask image output when the chosen format supports it. Disable to strip metadata. e.g. disabled for public files.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -518,7 +521,7 @@ export class DavixH2I implements INodeType {
 					name: 'width',
 					type: 'number',
 					default: 0,
-					description: 'Resize width in pixels.',
+					description: 'Set target width in pixels. Use 0 to leave width automatic where supported by the current action. e.g. 1200.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['format', 'resize'] } },
 				},
 				{
@@ -526,7 +529,7 @@ export class DavixH2I implements INodeType {
 					name: 'height',
 					type: 'number',
 					default: 0,
-					description: 'Resize height in pixels.',
+					description: 'Set target height in pixels. Use 0 to leave height automatic where supported by the current action. e.g. 800.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['format', 'resize'] } },
 				},
 				{
@@ -534,7 +537,7 @@ export class DavixH2I implements INodeType {
 					name: 'enlarge',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to allow upscaling when resizing.',
+					description: 'Whether to allow enlarging images beyond original dimensions during resize. Keep off to avoid quality loss from upscaling. e.g. disabled for thumbnails.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['resize'] } },
 				},
 				{
@@ -542,7 +545,7 @@ export class DavixH2I implements INodeType {
 					name: 'normalizeOrientation',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to auto-rotate based on EXIF orientation.',
+					description: 'Whether to normalize image orientation using EXIF metadata before processing. Enable for photos from phones/cameras that may appear rotated. e.g. enabled for mobile uploads.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['resize', 'crop', 'enhance'] } },
 				},
 				{
@@ -550,7 +553,7 @@ export class DavixH2I implements INodeType {
 					name: 'cropX',
 					type: 'number',
 					default: 0,
-					description: 'Left offset for crop.',
+					description: 'Set crop X offset in pixels from the left edge for multitask crop. Provide crop width/height values as well. e.g. 50.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['crop'] } },
 				},
 				{
@@ -558,7 +561,7 @@ export class DavixH2I implements INodeType {
 					name: 'cropY',
 					type: 'number',
 					default: 0,
-					description: 'Top offset for crop.',
+					description: 'Set crop Y offset in pixels from the top edge for multitask crop. Provide crop width/height values as well. e.g. 40.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['crop'] } },
 				},
 				{
@@ -566,7 +569,7 @@ export class DavixH2I implements INodeType {
 					name: 'cropWidth',
 					type: 'number',
 					default: 0,
-					description: 'Crop width in pixels.',
+					description: 'Set the crop box width in pixels. Use together with Crop X, Crop Y, and Crop Height for deterministic cropping. e.g. 600.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['crop'] } },
 				},
 				{
@@ -574,7 +577,7 @@ export class DavixH2I implements INodeType {
 					name: 'cropHeight',
 					type: 'number',
 					default: 0,
-					description: 'Crop height in pixels.',
+					description: 'Set the crop box height in pixels. Use together with Crop X, Crop Y, and Crop Width for deterministic cropping. e.g. 400.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['crop'] } },
 				},
 				{
@@ -582,7 +585,7 @@ export class DavixH2I implements INodeType {
 					name: 'backgroundColor',
 					type: 'string',
 					default: '',
-					description: 'Background color for crop, compress, or background actions.',
+					description: 'Set background color used by selected multitask actions that accept it. Use hex/CSS-like values. e.g. #ffffff.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['crop', 'compress', 'background'] } },
 				},
 				{
@@ -590,7 +593,7 @@ export class DavixH2I implements INodeType {
 					name: 'rotate',
 					type: 'number',
 					default: 0,
-					description: 'Rotate image by degrees.',
+					description: 'Set rotation in degrees for transform actions. Use positive or negative values as needed by your layout. e.g. 90.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['transform'] } },
 				},
 				{
@@ -598,7 +601,7 @@ export class DavixH2I implements INodeType {
 					name: 'flipH',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to flip the image horizontally.',
+					description: 'Whether to mirror the image left-to-right during transform. Combine with rotate when needed. e.g. enabled for selfie correction.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['transform'] } },
 				},
 				{
@@ -606,7 +609,7 @@ export class DavixH2I implements INodeType {
 					name: 'flipV',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to flip the image vertically.',
+					description: 'Whether to mirror the image top-to-bottom during transform. Use only when a vertical inversion is required. e.g. enabled for camera rig output.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['transform'] } },
 				},
 				{
@@ -614,7 +617,7 @@ export class DavixH2I implements INodeType {
 					name: 'colorSpace',
 					type: 'options',
 					default: 'srgb',
-					description: 'Color space to use for transforms or compression.',
+					description: 'Choose output color space for multitask transform/compress steps. cmyk can be unsupported in some environments. e.g. grayscale.',
 					options: [
 						{ name: 'sRGB', value: 'srgb' },
 						{ name: 'Grayscale', value: 'grayscale' },
@@ -627,7 +630,7 @@ export class DavixH2I implements INodeType {
 					name: 'targetSizeKB',
 					type: 'number',
 					default: 0,
-					description: 'Target output size in KB for compression (optional).',
+					description: 'Set target file size in kilobytes for compress action guidance. Leave 0 to skip target-size tuning. e.g. 250.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['compress'] } },
 				},
 				{
@@ -635,7 +638,7 @@ export class DavixH2I implements INodeType {
 					name: 'quality',
 					type: 'number',
 					default: 82,
-					description: 'Compression quality (1-100).',
+					description: 'Set encoder quality used by compression/output format paths. Higher values keep detail but produce larger files. e.g. 82.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['compress'] } },
 				},
 				{
@@ -643,7 +646,7 @@ export class DavixH2I implements INodeType {
 					name: 'blur',
 					type: 'number',
 					default: 0,
-					description: 'Apply blur radius (0 to skip).',
+					description: 'Set blur strength for enhance action; the API clamps to valid range. Use 0 to skip blurring. e.g. 2.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -651,7 +654,7 @@ export class DavixH2I implements INodeType {
 					name: 'sharpen',
 					type: 'number',
 					default: 0,
-					description: 'Sharpen amount (0 to skip).',
+					description: 'Set sharpen amount for enhance action; the API clamps to valid range. Use 0 to skip sharpening. e.g. 1.5.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -659,7 +662,7 @@ export class DavixH2I implements INodeType {
 					name: 'grayscale',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to convert the image to grayscale.',
+					description: 'Whether to convert output to grayscale in enhance action. Keep off to preserve color. e.g. enabled for monochrome previews.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -667,7 +670,7 @@ export class DavixH2I implements INodeType {
 					name: 'sepia',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to apply a sepia tone.',
+					description: 'Whether to apply a sepia color effect in enhance action. Use with moderate contrast/brightness for vintage look. e.g. enabled for retro style.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -675,7 +678,7 @@ export class DavixH2I implements INodeType {
 					name: 'brightness',
 					type: 'number',
 					default: 0,
-					description: 'Adjust brightness (-100 to 100).',
+					description: 'Set brightness adjustment value for enhance action. Use small increments and test visually because extreme values can clip detail. e.g. 0.9.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -683,7 +686,7 @@ export class DavixH2I implements INodeType {
 					name: 'contrast',
 					type: 'number',
 					default: 0,
-					description: 'Adjust contrast (-100 to 100).',
+					description: 'Set contrast adjustment value for enhance action. Use moderate values to avoid crushed shadows/highlights. e.g. 1.1.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -691,7 +694,7 @@ export class DavixH2I implements INodeType {
 					name: 'saturation',
 					type: 'number',
 					default: 0,
-					description: 'Adjust saturation (-100 to 100).',
+					description: 'Set saturation adjustment value for enhance action. Lower values mute color and higher values intensify color. e.g. 1.2.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['enhance'] } },
 				},
 				{
@@ -699,7 +702,7 @@ export class DavixH2I implements INodeType {
 					name: 'pad',
 					type: 'number',
 					default: 0,
-					description: 'Uniform padding size.',
+					description: 'Set uniform padding (pixels) applied to all sides when padding/frame is used. Side-specific values can override this in padding mode. e.g. 24.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['frame'] } },
 				},
 				{
@@ -707,7 +710,7 @@ export class DavixH2I implements INodeType {
 					name: 'padColor',
 					type: 'string',
 					default: '',
-					description: 'Padding color (e.g. #ffffff).',
+					description: 'Set pad fill color using hex/CSS-like syntax when padding or framing is applied. Leave empty to let API defaults apply where supported. e.g. #ffffff.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['frame', 'background'] } },
 				},
 				{
@@ -715,7 +718,7 @@ export class DavixH2I implements INodeType {
 					name: 'border',
 					type: 'number',
 					default: 0,
-					description: 'Border thickness in pixels.',
+					description: 'Set border thickness in pixels for frame action. Use 0 to remove border. e.g. 4.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['frame'] } },
 				},
 				{
@@ -723,7 +726,7 @@ export class DavixH2I implements INodeType {
 					name: 'borderColor',
 					type: 'string',
 					default: '',
-					description: 'Border color (e.g. #000000).',
+					description: 'Set border color for frame action using hex/CSS-like color syntax. e.g. #000000.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['frame'] } },
 				},
 				{
@@ -731,7 +734,7 @@ export class DavixH2I implements INodeType {
 					name: 'borderRadius',
 					type: 'number',
 					default: 0,
-					description: 'Rounded corner radius.',
+					description: 'Set border radius in pixels for rounded corners on frame/background actions. Use 0 for square corners. e.g. 12.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['frame', 'background'] } },
 				},
 				{
@@ -739,7 +742,7 @@ export class DavixH2I implements INodeType {
 					name: 'backgroundBlur',
 					type: 'number',
 					default: 0,
-					description: 'Blur background by this radius.',
+					description: 'Set background blur strength for background action; API clamps large values. Use 0 to disable blur. e.g. 15.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['background'] } },
 				},
 				{
@@ -747,7 +750,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkText',
 					type: 'string',
 					default: '',
-					description: 'Text watermark to overlay.',
+					description: 'Enter watermark text to overlay for image watermark action. Leave empty if you are using only an image watermark file. e.g. Confidential.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 				{
@@ -755,7 +758,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkFontSize',
 					type: 'number',
 					default: 24,
-					description: 'Font size for text watermark.',
+					description: 'Set text watermark font size in pixels. Increase for high-resolution images. e.g. 24.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 				{
@@ -763,7 +766,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkColor',
 					type: 'string',
 					default: '#000000',
-					description: 'Text watermark color.',
+					description: 'Set text watermark color using hex/CSS-like syntax. e.g. #000000.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 				{
@@ -771,7 +774,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkOpacity',
 					type: 'number',
 					default: 0.35,
-					description: 'Watermark opacity between 0 and 1.',
+					description: 'Set text/image watermark opacity from 0 (transparent) to 1 (solid). Use lower values for subtle marks. e.g. 0.35.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 				{
@@ -779,6 +782,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
+					description: 'Choose watermark placement for PDF watermark action. Start with center or corner positions for predictable layout. e.g. top-right.',
 					options: [
 						{ name: 'Center', value: 'center' },
 						{ name: 'Top', value: 'top' },
@@ -790,7 +794,7 @@ export class DavixH2I implements INodeType {
 						{ name: 'Bottom Left', value: 'bottom-left' },
 						{ name: 'Bottom Right', value: 'bottom-right' },
 					],
-					description: 'Position for text/image watermark.',
+					description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 				{
@@ -798,7 +802,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkMargin',
 					type: 'number',
 					default: 8,
-					description: 'Margin/padding around watermark.',
+					description: 'Set spacing around watermark placement in pixels. Increase to pull marks away from edges. e.g. 16.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 				{
@@ -806,7 +810,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkScale',
 					type: 'number',
 					default: 1,
-					description: 'Scale factor for watermark size.',
+					description: 'Set watermark scaling multiplier for image watermark action. Use 1 for original size and adjust cautiously for readability. e.g. 1.2.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 				{
@@ -815,7 +819,7 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: '',
 					placeholder: 'watermarkImage',
-					description: 'Binary property containing an image watermark (optional).',
+					description: 'Use the name of the incoming binary property that contains the watermark image, usually ‘data’ unless you renamed it. Leave empty to use text-only watermark settings. e.g. data.',
 					displayOptions: { show: { resource: ['image'], operation: ['multitask'], actions: ['watermark'] } },
 				},
 
@@ -824,7 +828,7 @@ export class DavixH2I implements INodeType {
 					name: 'imageDownloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to download the returned URL(s) into binary data (results remain in JSON).',
+					description: 'Whether to download returned result URLs into binary data for image operations that output files. For multiple outputs, binary keys are suffixed with _0, _1, and so on. e.g. enabled for direct file handoff.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -837,7 +841,8 @@ export class DavixH2I implements INodeType {
 					name: 'imageOutputBinaryProperty',
 					type: 'string',
 					default: 'data',
-					description: 'Binary property name to store the downloaded file.',
+					placeholder: 'data',
+					description: 'Set the binary property name used for downloaded image outputs. If multiple result URLs are returned, the node appends suffixes like _0 and _1. e.g. data.',
 					displayOptions: {
 						show: {
 							resource: ['image'],
@@ -857,7 +862,7 @@ export class DavixH2I implements INodeType {
 					default: 'data',
 					placeholder: 'data OR pdf1,pdf2',
 					description:
-						'Comma-separated binary property names (each will be sent as a `files` PDF). For merge, provide multiple.',
+						'Provide one or more incoming PDF binary property names, separated by commas. Use the property names present on each input item, usually ‘data’ unless renamed. e.g. data,attachment1.',
 					displayOptions: { show: { resource: ['pdf'] } },
 				},
 				{
@@ -865,7 +870,7 @@ export class DavixH2I implements INodeType {
 					name: 'sortByName',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to sort uploaded PDFs by filename before merging.',
+					description: 'Whether to sort uploaded PDFs by filename before merge. Disable to preserve the order from your binary property list. e.g. enabled for predictable alphabetical merges.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['merge'] } },
 				},
 				{
@@ -874,7 +879,7 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: '',
 					placeholder: '1-3,4-5',
-					description: 'Page ranges to keep when splitting (e.g. 1-3,5).',
+					description: 'Enter split ranges as CSV page intervals. Use positive 1-based pages and commas between ranges. e.g. 1-3,5.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['split'] } },
 				},
 				{
@@ -882,7 +887,7 @@ export class DavixH2I implements INodeType {
 					name: 'prefix',
 					type: 'string',
 					default: 'split_',
-					description: 'Prefix for split output files.',
+					description: 'Set filename prefix for split outputs returned by the API. Keep it short for easier downstream naming. e.g. split_.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['split', 'extract'] } },
 				},
 				{
@@ -890,7 +895,7 @@ export class DavixH2I implements INodeType {
 					name: 'mode',
 					type: 'options',
 					default: 'single',
-					description: 'Choose how to extract pages: Single extracts selected pages into one PDF, Multiple extracts each selected page into a separate PDF.',
+					description: 'Choose extract output mode for /v1/pdf extract action. Single creates one PDF from selected pages; Multiple creates one file per selected page. e.g. multiple.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['extract'] } },
 					options: [
 						{ name: 'Single', value: 'single' },
@@ -903,7 +908,7 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: 'all',
 					placeholder: 'all OR 1-3,5,7',
-					description: 'Page selection, e.g. all or 1-3,5.',
+					description: 'Enter pages as all, first, or CSV ranges depending on action support. Invalid page syntax can cause invalid_parameter errors. e.g. 1,3-5.',
 					displayOptions: {
 						show: { resource: ['pdf'], operation: ['to-images', 'extract-images', 'watermark', 'rotate', 'delete-pages', 'extract'] },
 					},
@@ -913,7 +918,7 @@ export class DavixH2I implements INodeType {
 					name: 'toFormat',
 					type: 'options',
 					default: 'png',
-					description: 'Image format when converting PDF pages.',
+					description: 'Choose image format for PDF to-images output. Use png for quality or jpeg/webp for smaller files. e.g. png.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -921,16 +926,16 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } },
 				},
-				{ displayName: 'Width', name: 'pdfWidth', type: 'number', default: 0, description: 'Resize width for PDF to images (optional).', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
-				{ displayName: 'Height', name: 'pdfHeight', type: 'number', default: 0, description: 'Resize height for PDF to images (optional).', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
-				{ displayName: 'DPI', name: 'dpi', type: 'number', default: 150, description: 'Rendering DPI for PDF to images.', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
+				{ displayName: 'Width', name: 'pdfWidth', type: 'number', default: 0, description: 'Set optional output width in pixels for PDF page image conversion. Leave 0 to keep API/default sizing. e.g. 1200.', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
+				{ displayName: 'Height', name: 'pdfHeight', type: 'number', default: 0, description: 'Set optional output height in pixels for PDF page image conversion. Leave 0 to keep API/default sizing. e.g. 1600.', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
+				{ displayName: 'DPI', name: 'dpi', type: 'number', default: 150, description: 'Set render density (DPI) for PDF page rasterization. Higher DPI improves detail but increases processing time and output size. e.g. 300.', displayOptions: { show: { resource: ['pdf'], operation: ['to-images'] } } },
 
 				{
 					displayName: 'Extract Image Format',
 					name: 'extractImageFormat',
 					type: 'options',
 					default: 'png',
-					description: 'Image format for extracted images.',
+					description: 'Choose output format for images extracted from PDF content. Use png for lossless extraction where needed. e.g. jpeg.',
 					options: [
 						{ name: 'PNG', value: 'png' },
 						{ name: 'JPEG', value: 'jpeg' },
@@ -938,13 +943,14 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['pdf'], operation: ['extract-images'] } },
 				},
-				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', description: 'Optional text watermark to apply.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, description: 'Watermark opacity (0-1).', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Text', name: 'watermarkText', type: 'string', default: '', placeholder: 'Internal use only', description: 'Enter optional text watermark for PDF watermark action. Leave empty when only image watermark is needed. e.g. Internal use only.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Opacity', name: 'watermarkOpacity', type: 'number', default: 0.35, description: 'Set watermark opacity from 0 to 1 for PDF watermark action. Lower values create subtler overlays. e.g. 0.25.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Position',
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
+					description: 'Choose watermark placement for PDF watermark action. Start with center or corner positions for predictable layout. e.g. top-right.',
 					options: [
 						{ name: 'Center', value: 'center' },
 						{ name: 'Top Left', value: 'top-left' },
@@ -954,13 +960,13 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
 				},
-				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Margin', name: 'watermarkMargin', type: 'number', default: 8, description: 'Set spacing around the PDF watermark placement in pixels. Increase to keep the mark away from page edges. e.g. 12.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark X',
 					name: 'watermarkX',
 					type: 'number',
 					default: 0,
-					description: 'Optional X offset for watermark positioning. Sent as x when non-zero.',
+					description: 'Set optional horizontal watermark offset in pixels. Use 0 to skip sending x and rely on position/margin. e.g. 12.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
 				},
 				{
@@ -968,40 +974,41 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkY',
 					type: 'number',
 					default: 0,
-					description: 'Optional Y offset for watermark positioning. Sent as y when non-zero.',
+					description: 'Set optional vertical watermark offset in pixels. Use 0 to skip sending y and rely on position/margin. e.g. -8.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
 				},
-				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
-				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Scale factor for watermark.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Font Size', name: 'watermarkFontSize', type: 'number', default: 24, description: 'Set text watermark font size for PDF watermark action. Increase for high-resolution or large-page documents. e.g. 24.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Color', name: 'watermarkColor', type: 'string', default: '#000000', placeholder: '#000000', description: 'Set text watermark color for PDF watermark action using hex or CSS-like color values. e.g. #000000.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
+				{ displayName: 'Watermark Scale', name: 'watermarkScale', type: 'number', default: 1, description: 'Set watermark scaling multiplier for PDF/image watermark operations. Use 1 for default size. e.g. 0.8.', displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } } },
 				{
 					displayName: 'Watermark Image Binary Property',
 					name: 'watermarkImageBinaryProp',
 					type: 'string',
 					default: '',
-					description: 'Binary property containing an image watermark (optional).',
+					placeholder: 'data',
+					description: 'Use the name of the incoming binary property that contains the watermark image, usually ‘data’ unless you renamed it. Leave empty to use text-only watermark settings. e.g. data.',
 					displayOptions: { show: { resource: ['pdf'], operation: ['watermark'] } },
 				},
-				{ displayName: 'Degrees', name: 'degrees', type: 'options', default: 90, description: 'Rotation angle in degrees.', options: [{ name: '90', value: 90 }, { name: '180', value: 180 }, { name: '270', value: 270 }], displayOptions: { show: { resource: ['pdf'], operation: ['rotate'] } } },
-				{ displayName: 'Title', name: 'title', type: 'string', default: '', description: 'Set PDF title metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Author', name: 'author', type: 'string', default: '', description: 'Set PDF author metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Subject', name: 'subject', type: 'string', default: '', description: 'Set PDF subject metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Keywords', name: 'keywords', type: 'string', default: '', description: 'Set PDF keywords metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Creator', name: 'creator', type: 'string', default: '', description: 'Set PDF creator metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF producer metadata.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Whether to remove existing metadata before applying new fields.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Order (CSV or JSON Array)', name: 'order', type: 'string', default: '', description: 'Page order as CSV (e.g. 2,1,3) or JSON array (e.g. [2,1,3]). JSON is converted to CSV before sending.', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
-				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: true, description: 'Whether to flatten form fields into static content.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
-				{ displayName: 'User Password', name: 'userPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'User password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
-				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'Owner password for encryption.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
-				{ displayName: 'Password', name: 'password', type: 'string', typeOptions: { password: true }, default: '', description: 'Password to decrypt PDF.', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
+				{ displayName: 'Degrees', name: 'degrees', type: 'options', default: 90, description: 'Select clockwise rotation angle applied to selected PDF pages. Use together with Pages field to target specific pages. e.g. 90.', options: [{ name: '90', value: 90 }, { name: '180', value: 180 }, { name: '270', value: 270 }], displayOptions: { show: { resource: ['pdf'], operation: ['rotate'] } } },
+				{ displayName: 'Title', name: 'title', type: 'string', default: '', description: 'Set PDF Title metadata value in metadata action. Leave empty to keep existing title unless clean is enabled. e.g. Q1 Report.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Author', name: 'author', type: 'string', default: '', description: 'Set PDF Author metadata value in metadata action. e.g. Finance Team.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Subject', name: 'subject', type: 'string', default: '', description: 'Set PDF Subject metadata value in metadata action. e.g. Quarterly performance.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Keywords', name: 'keywords', type: 'string', default: '', description: 'Set PDF Keywords metadata as a comma-separated text string. e.g. finance,quarterly,kpi.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Creator', name: 'creator', type: 'string', default: '', description: 'Set PDF Creator metadata value in metadata action. e.g. n8n workflow.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF Producer metadata value in metadata action. e.g. Davix PixLab API.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Whether to clear existing PDF metadata before applying new metadata fields. Enable when you need a clean metadata set. e.g. enabled for document sanitization.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Order (CSV or JSON Array)', name: 'order', type: 'string', default: '', placeholder: '2,1,3', description: 'Enter page order as CSV or JSON array of positive page numbers. The node converts JSON arrays to CSV before sending to the API. e.g. 2,1,3.', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
+				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: true, description: 'Whether to flatten interactive form fields into static page content. Enable when recipients should not edit form fields. e.g. enabled before archival.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
+				{ displayName: 'User Password', name: 'userPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'Set required user password for PDF encryption. Use a strong value and store it securely outside workflow logs. e.g. user-pass-2026.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
+				{ displayName: 'Owner Password', name: 'ownerPassword', type: 'string', typeOptions: { password: true }, default: '', description: 'Set optional owner password for PDF encryption; if blank, API may default to user password. Use a separate value for admin permissions. e.g. owner-pass-2026.', displayOptions: { show: { resource: ['pdf'], operation: ['encrypt'] } } },
+				{ displayName: 'Password', name: 'password', type: 'string', typeOptions: { password: true }, default: '', description: 'Enter the current password required to decrypt a protected PDF. Decryption fails if this value is incorrect. e.g. current-doc-pass.', displayOptions: { show: { resource: ['pdf'], operation: ['decrypt'] } } },
 
 				{
 					displayName: 'Download Result(s) as Binary',
 					name: 'pdfDownloadBinary',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to download all URL results into binary properties.',
+					description: 'Whether to download every returned PDF result URL into binary data. When multiple files are returned, the node names them as <property>_0, <property>_1, and so on. e.g. enabled for split outputs.',
 					displayOptions: { show: { resource: ['pdf'] } },
 				},
 				{
@@ -1009,7 +1016,8 @@ export class DavixH2I implements INodeType {
 					name: 'pdfOutputBinaryProperty',
 					type: 'string',
 					default: 'data',
-					description: 'Binary property name to store downloaded PDF/image results.',
+					placeholder: 'data',
+					description: 'Set the base binary property name for downloaded PDF operation outputs. Multi-file responses append numeric suffixes to this base name. e.g. data.',
 					displayOptions: { show: { resource: ['pdf'], pdfDownloadBinary: [true] } },
 				},
 
@@ -1022,7 +1030,7 @@ export class DavixH2I implements INodeType {
 					type: 'string',
 					default: 'data',
 					placeholder: 'data OR img1,img2',
-					description: 'Comma-separated binary properties containing images to analyze (sent as images files).',
+					description: 'Provide incoming image binary property names separated by commas for Tools analysis. Use the names present on each item, usually ‘data’ unless renamed. e.g. data,image2.',
 					displayOptions: { show: { resource: ['tools'] } },
 				},
 				{
@@ -1030,7 +1038,7 @@ export class DavixH2I implements INodeType {
 					name: 'tool',
 					type: 'options',
 					default: 'metadata',
-					description: 'Single PixLab tool to run in action=single.',
+					description: 'Choose exactly one analysis tool for Tools Single mode. The node sends this value as tools to /v1/tools. e.g. metadata.',
 					options: [
 						{ name: 'Metadata', value: 'metadata' },
 						{ name: 'Colors', value: 'colors' },
@@ -1051,7 +1059,7 @@ export class DavixH2I implements INodeType {
 					name: 'tools',
 					type: 'multiOptions',
 					default: ['metadata'],
-					description: 'Multiple PixLab tools to run together in action=multitask.',
+					description: 'Choose multiple analysis tools to run in one Tools Multitask request. The node sends a comma-separated list in the tools field. e.g. metadata,colors.',
 					options: [
 						{ name: 'Metadata', value: 'metadata' },
 						{ name: 'Colors', value: 'colors' },
@@ -1072,7 +1080,7 @@ export class DavixH2I implements INodeType {
 					name: 'metadataIncludeRawExifSingle',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to include raw EXIF data when available.',
+					description: 'Whether to include raw EXIF blocks in metadata responses when supported. Disable for smaller payloads. e.g. enabled when forensic metadata is needed.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['metadata'] } },
 				},
 				{
@@ -1080,7 +1088,7 @@ export class DavixH2I implements INodeType {
 					name: 'paletteSizeSingle',
 					type: 'number',
 					default: 5,
-					description: 'Number of colors to extract.',
+					description: 'Set palette size for color analysis. PixLab supports a small bounded range, so keep values modest. e.g. 5.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['palette'] } },
 				},
 				{
@@ -1088,7 +1096,7 @@ export class DavixH2I implements INodeType {
 					name: 'hashTypeSingle',
 					type: 'options',
 					default: 'phash',
-					description: 'Hash algorithm to compute.',
+					description: 'Choose hash algorithm for hash tool output. Use phash for perceptual matching or cryptographic hashes for exact-byte identity checks. e.g. phash.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['hash'] } },
 					options: [
 						{ name: 'pHash', value: 'phash' },
@@ -1102,7 +1110,7 @@ export class DavixH2I implements INodeType {
 					name: 'similarityModeSingle',
 					type: 'string',
 					default: 'pairs',
-					description: 'Similarity mode.',
+					description: 'Choose how similarity comparisons are computed. pairs compares every pair, while tofirst compares each image to the first image. e.g. pairs.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
 				},
 				{
@@ -1110,7 +1118,7 @@ export class DavixH2I implements INodeType {
 					name: 'similarityThresholdSingle',
 					type: 'number',
 					default: 8,
-					description: 'Similarity threshold.',
+					description: 'Set similarity threshold used by the similarity tool (API clamps to valid range). Lower values are stricter matches. e.g. 8.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['similarity'] } },
 				},
 				{
@@ -1118,7 +1126,7 @@ export class DavixH2I implements INodeType {
 					name: 'qualitySampleSingle',
 					type: 'number',
 					default: 256,
-					description: 'Sample size for quality analysis.',
+					description: 'Set sampling resolution for quality analysis (higher can improve precision but costs more processing). e.g. 256.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['quality'] } },
 				},
 				{
@@ -1126,7 +1134,7 @@ export class DavixH2I implements INodeType {
 					name: 'transparencySampleSingle',
 					type: 'number',
 					default: 64,
-					description: 'Sample size for transparency analysis.',
+					description: 'Set sampling resolution for transparency analysis. Use moderate values for faster processing on large images. e.g. 64.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['transparency'] } },
 				},
 				{
@@ -1134,7 +1142,7 @@ export class DavixH2I implements INodeType {
 					name: 'efficiencyFormatSingle',
 					type: 'string',
 					default: '',
-					description: 'Output format for efficiency tool.',
+					description: 'Choose target format used by efficiency analysis simulation. Pick the format you want to evaluate for size/quality trade-offs. e.g. webp.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['efficiency'] } },
 				},
 				{
@@ -1142,7 +1150,7 @@ export class DavixH2I implements INodeType {
 					name: 'efficiencyQualitySingle',
 					type: 'number',
 					default: 0,
-					description: 'Quality setting for efficiency tool.',
+					description: 'Set quality value used by efficiency analysis when format supports quality controls. Leave 0 to let API defaults apply. e.g. 80.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['efficiency'] } },
 				},
 				{
@@ -1150,7 +1158,7 @@ export class DavixH2I implements INodeType {
 					name: 'metadataIncludeRawExifMulti',
 					type: 'boolean',
 					default: false,
-					description: 'Whether to include raw EXIF data when available.',
+					description: 'Whether to include raw EXIF blocks in metadata responses when supported. Disable for smaller payloads. e.g. enabled when forensic metadata is needed.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['metadata'] } },
 				},
 				{
@@ -1158,7 +1166,7 @@ export class DavixH2I implements INodeType {
 					name: 'paletteSizeMulti',
 					type: 'number',
 					default: 5,
-					description: 'Number of colors to extract.',
+					description: 'Set palette size for color analysis. PixLab supports a small bounded range, so keep values modest. e.g. 5.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['palette'] } },
 				},
 				{
@@ -1166,7 +1174,7 @@ export class DavixH2I implements INodeType {
 					name: 'hashTypeMulti',
 					type: 'options',
 					default: 'phash',
-					description: 'Hash algorithm to compute.',
+					description: 'Choose hash algorithm for hash tool output. Use phash for perceptual matching or cryptographic hashes for exact-byte identity checks. e.g. phash.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['hash'] } },
 					options: [
 						{ name: 'pHash', value: 'phash' },
@@ -1180,7 +1188,7 @@ export class DavixH2I implements INodeType {
 					name: 'similarityModeMulti',
 					type: 'string',
 					default: 'pairs',
-					description: 'Similarity mode.',
+					description: 'Choose how similarity comparisons are computed. pairs compares every pair, while tofirst compares each image to the first image. e.g. pairs.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
 				},
 				{
@@ -1188,7 +1196,7 @@ export class DavixH2I implements INodeType {
 					name: 'similarityThresholdMulti',
 					type: 'number',
 					default: 8,
-					description: 'Similarity threshold.',
+					description: 'Set similarity threshold used by the similarity tool (API clamps to valid range). Lower values are stricter matches. e.g. 8.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['similarity'] } },
 				},
 				{
@@ -1196,7 +1204,7 @@ export class DavixH2I implements INodeType {
 					name: 'qualitySampleMulti',
 					type: 'number',
 					default: 256,
-					description: 'Sample size for quality analysis.',
+					description: 'Set sampling resolution for quality analysis (higher can improve precision but costs more processing). e.g. 256.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['quality'] } },
 				},
 				{
@@ -1204,7 +1212,7 @@ export class DavixH2I implements INodeType {
 					name: 'transparencySampleMulti',
 					type: 'number',
 					default: 64,
-					description: 'Sample size for transparency analysis.',
+					description: 'Set sampling resolution for transparency analysis. Use moderate values for faster processing on large images. e.g. 64.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['transparency'] } },
 				},
 				{
@@ -1212,7 +1220,7 @@ export class DavixH2I implements INodeType {
 					name: 'efficiencyFormatMulti',
 					type: 'string',
 					default: '',
-					description: 'Output format for efficiency tool.',
+					description: 'Choose target format used by efficiency analysis simulation. Pick the format you want to evaluate for size/quality trade-offs. e.g. webp.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['efficiency'] } },
 				},
 				{
@@ -1220,7 +1228,7 @@ export class DavixH2I implements INodeType {
 					name: 'efficiencyQualityMulti',
 					type: 'number',
 					default: 0,
-					description: 'Quality setting for efficiency tool.',
+					description: 'Set quality value used by efficiency analysis when format supports quality controls. Leave 0 to let API defaults apply. e.g. 80.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['efficiency'] } },
 				},
 			],
