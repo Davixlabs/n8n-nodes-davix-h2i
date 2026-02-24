@@ -276,7 +276,7 @@ Q: Can I use a self-hosted Davix instance?
 A: Yes — set the Base URL in credentials to your instance's URL (e.g., `https://your-davix.example.com`).
 
 Q: Can the node process multiple files and return multiple binary outputs?  
-A: The node can accept multiple input binaries (as comma-separated binary property names). When the API returns multiple result URLs, the node currently downloads the first URL to the configured output binary property. For multi-file responses, check the JSON `results` array and handle additional URLs via subsequent nodes or custom scripts.
+A: The node can accept multiple input binaries (as comma-separated binary property names). For H2I operations, it downloads the first returned URL to the configured binary property. For Image and PDF operations, it downloads all returned URLs and stores them as suffixed binary properties (for example `data_0`, `data_1`, ...).
 
 Q: How do I send several images in one call?  
 A: Use the Input Binary Properties field and provide a comma-separated list of binary property names produced by previous nodes. Each will be attached as an `images` file in the multipart request.
