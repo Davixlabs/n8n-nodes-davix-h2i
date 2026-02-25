@@ -32,7 +32,8 @@
     "dev": "tsc --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "node --test tests/**/*.test.js"
+    "test": "node --test tests/**/*.test.js",
+    "prepack": "npm run build"
   },
   "devDependencies": {
     "@n8n/eslint-plugin-community-nodes": "^0.7.0",
@@ -50,5 +51,8 @@
     "nodes": [
       "dist/nodes/DavixH2I/DavixH2I.node.js"
     ]
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
