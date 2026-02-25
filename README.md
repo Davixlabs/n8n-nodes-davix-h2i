@@ -13,7 +13,7 @@ This package provides the **Davix H2I** node for n8n workflows. It connects n8n 
 - Product brand: **Davix H2I**
 - Backend engine: **Davix H2I Engine (PixLab)**
 - Organization: **Davix Labs**
-- Website: https://davix.dev
+- Website: https://h2i.davix.dev
 
 ## Features
 
