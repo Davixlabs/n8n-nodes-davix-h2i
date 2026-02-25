@@ -1,7 +1,7 @@
 # Davix H2I — n8n Community Node
 > Official Davix H2I integration for n8n, powered by the Davix H2I Engine (PixLab).
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-black?labelColor=000000)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?labelColor=000000)](LICENSE)
 [![npm version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fregistry.npmjs.org%2Fn8n-nodes-davix-h2i&query=%24.version&label=npm&labelColor=000000&color=orange)](https://www.npmjs.com/package/n8n-nodes-davix-h2i)
 [![n8n](https://img.shields.io/badge/integrates-n8n-red?labelColor=000000)](https://n8n.io)
 [![Website](https://img.shields.io/badge/website-h2i.davix.dev-fc0082?labelColor=000000)](https://h2i.davix.dev)
