@@ -6,7 +6,6 @@ Repository structure observed in the current codebase:
 
 ```text
 /root
- ├─ agent.md
  ├─ README.md
  ├─ LICENSE
  ├─ package.json
@@ -151,7 +150,6 @@ Based on current file and code structure:
 
 ## Evidence Index
 
-- `agent.md` — repository-level documentation constraints for generation.
 - `package.json` — package metadata, scripts, n8n entrypoints, version, test script, lint/build config.
 - `tsconfig.json` — TypeScript compiler target/module/output settings.
 - `eslint.config.js` — lint baseline and ignore patterns.

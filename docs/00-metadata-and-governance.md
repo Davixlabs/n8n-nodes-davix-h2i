@@ -2,9 +2,7 @@
 
 ## 00.1 Purpose and Scope
 - This SSOT document covers this n8n community node repository only.
-  **Evidence:** `agent.md:6-13`
 - The SSOT set is intended to be the source for derived documentation artifacts.
-  **Evidence:** `agent.md:52-61`
 
 ## 00.2 Intended Audiences
 - Users
@@ -12,7 +10,6 @@
 - Developers
 - Operators
 - Reviewers/sponsors
-  **Evidence:** `agent.md:54-60`
 
 ## 00.3 Repository Identification
 - Repository name (discoverable from repository URL): `n8n-nodes-davix-h2i`.
@@ -95,10 +92,7 @@
   **Evidence:** `README.md:286-289`
 
 ## 00.7 Documentation Governance
-- Doc-first workflow rule: SSOT files are authoritative and derived docs must come from these files.
-  **Evidence:** `agent.md:52-61`
-- Requirement that factual claims are evidence-based and non-invented.
-  **Evidence:** `agent.md:67-93`
+- Documentation in this repository is evidence-based and derived from repository code.
 - How changes should be proposed:
   - README contributor guidance specifies fork, feature branch, local build/test, and pull request.
     **Evidence:** `README.md:254-260`
@@ -118,11 +112,9 @@
 - End-user Node.js runtime requirement is confirmed in code via `engines.node: ">=20"`.
 - Formal CODEOWNERS or maintainer policy file is not confirmed in code.
 - Formal release notes/changelog file beyond README statements is not confirmed in code.
-- Dedicated documentation governance process beyond `agent.md` constraints is not confirmed in code.
 - Runtime environment variables for the node itself are not confirmed in code.
 
 ## Evidence Index
-- `agent.md` — SSOT purpose, scope, and evidence-only documentation requirements.
 - `package.json` — package identity, version, license, repository URLs, author, build/test scripts, n8n registration, peer dependency.
 - `nodes/DavixH2I/DavixH2I.node.ts` — node display name/default name and node description text.
 - `credentials/DavixH2IApi.credentials.ts` — credential type name/display name and PixLab base URL default field.
