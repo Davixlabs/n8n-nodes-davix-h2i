@@ -194,7 +194,7 @@ Requests include the `x-api-key` header (the node injects this from credentials)
 ## Release process
 
 Publishing is automated from GitHub Actions on tag push using the pattern `v*.*.*` (for example `v1.2.3`).
-The publish workflow runs verification first (`npm ci --ignore-scripts`, `npm run lint`, `npm run build`, `npm test`, `npm pack --dry-run`, and `npx @n8n/scan-community-package <package-name-from-package.json>`) and only then runs `npm publish --provenance --access public`.
+The publish workflow runs verification first (`npm ci`, `npm run lint`, `npm run build`, `npm test`, `npm pack --dry-run`, and `npx @n8n/scan-community-package <package-name-from-package.json>`) and only then runs `npm publish --provenance --access public`.
 
 To use this flow, enable npm Trusted Publishing (OIDC) for this repository in npm settings and keep the workflow permission `id-token: write` enabled.
 
@@ -205,13 +205,13 @@ This package is authored in TypeScript. Standard commands (see `package.json`) a
 - Build:
 ```bash
 npm run build
-# runs: n8n-node build && npm run copy:icons
+# runs: tsc && npm run copy:icons
 ```
 
 - Development mode:
 ```bash
 npm run dev
-# runs: n8n-node dev
+# runs: tsc --watch
 ```
 
 - Lint:
@@ -223,7 +223,7 @@ npm run lint:fix
 Project layout:
 - `nodes/` — TypeScript source for node and helpers.
 - `dist/` — compiled output (what n8n loads at runtime).
-- `package.json` uses `n8n-node` tooling and declares `dist/` files for distribution.
+- `package.json` declares TypeScript/eslint scripts and publishes only `dist/` files for distribution.
 
 Icon
 - A custom SVG icon is included at `nodes/DavixH2I/davixH2I.svg`. If icon does not appear in n8n, try restarting n8n or reinstalling the package.

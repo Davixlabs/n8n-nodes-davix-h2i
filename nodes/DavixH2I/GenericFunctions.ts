@@ -90,6 +90,10 @@ export function parseDavixErrorEnvelope(responseBody: unknown): {
 			? body.request_id
 			: typeof body.requestId === 'string'
 				? body.requestId
+				: typeof nestedError?.request_id === 'string'
+					? nestedError.request_id
+					: typeof nestedError?.requestId === 'string'
+						? nestedError.requestId
 				: undefined;
 
 	return { code, message, hint, requestId };
@@ -120,8 +124,21 @@ export async function davixRequest(
 		const statusCode = err.statusCode ?? err.response?.statusCode;
 		const responseBody = err.error ?? err.response?.body;
 		const parsed = parseDavixErrorEnvelope(responseBody);
+		const statusMessage =
+			statusCode === 429
+				? 'PixLab API rate limit reached (429). Retry with backoff.'
+				: statusCode === 503
+					? 'PixLab API is temporarily unavailable (503). Retry shortly.'
+					: statusCode === 413
+						? 'Upload is too large for PixLab API (413). Reduce file size.'
+						: undefined;
+		const envelopeMessage =
+			parsed.code && parsed.message
+				? `${parsed.code}: ${parsed.message}`
+				: parsed.message;
 
 		const remediation = [
+			statusMessage,
 			'Check that your API key is valid and active.',
 			'Check that the Base URL points to your PixLab instance.',
 			'Check the binary property names configured in the node input.',
@@ -132,11 +149,8 @@ export async function davixRequest(
 			.filter(Boolean)
 			.join(' ');
 
-		throw new NodeApiError(this.getNode(), error as JsonObject, {
-			message:
-				parsed.code && parsed.message
-					? `${parsed.code}: ${parsed.message}`
-					: parsed.message,
+		throw new NodeApiError(this.getNode(), { message: String(envelopeMessage || statusMessage || 'Request failed') } as JsonObject, {
+			message: envelopeMessage || statusMessage,
 			description: remediation,
 			httpCode: statusCode ? String(statusCode) : undefined,
 		});
