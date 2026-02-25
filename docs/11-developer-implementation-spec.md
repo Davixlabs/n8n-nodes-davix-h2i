@@ -145,7 +145,7 @@ Based on current file and code structure:
 
 - The repository includes `src/index.ts` with `export {};`, but no explicit in-repo code showing runtime registration wiring beyond `package.json` metadata and expected compiled outputs. Not confirmed in code whether additional packaging steps outside this repository add exports.
   - Files checked: `src/index.ts`, `package.json`.
-- Tests import from `dist/.../GenericFunctions.js`, but this document does not confirm CI ordering (build-before-test) beyond available npm scripts. Not confirmed in code.
+- Tests import from `dist/.../GenericFunctions.js`, and the `test` script runs `npm run build` before executing tests, ensuring that compiled artifacts are present during test execution.
   - Files checked: `tests/GenericFunctions.test.js`, `package.json`.
 
 ## Evidence Index
