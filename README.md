@@ -1,57 +1,63 @@
 # Davix H2I
+> Official n8n community node for DavixH2I workflows running on the Davix H2I Engine (PixLab).
 
-Davix H2I is an n8n community node for calling Davix PixLab APIs from workflows. It lets you render HTML to images/PDFs, process images, run PDF operations, and perform image analysis tools. It is designed for n8n users who want to automate media and document tasks directly inside workflow pipelines.
-
----
+This is the official DavixH2I node for n8n. It connects n8n workflows to the Davix H2I Engine (PixLab), enables programmatic access to supported rendering, image, PDF, and analysis operations, and is maintained by Davix Labs.
 
 ## Overview
 
-This integration connects n8n to PixLab endpoints through a single node with multiple resources. You can choose a resource (H2I, Image, PDF, or Tools), then select an operation and provide either JSON fields or binary inputs depending on the operation. The node returns API JSON responses and can optionally download result files into n8n binary properties for downstream steps.
+DavixH2I is the workflow integration layer for using Davix H2I capabilities inside n8n. The node sends requests from n8n to the Davix H2I Engine (PixLab), which performs backend processing for the selected operation.
 
----
+In practical terms:
+- DavixH2I is the product and node integration used by n8n builders.
+- Davix H2I Engine (PixLab) is the backend execution engine.
+- DavixH2I and PixLab are owned by Davix Labs.
+
+Davix Labs: https://davix.dev
 
 ## Features
 
-- H2I resource for rendering HTML to:
-  - image output
-  - PDF output
-- Image resource operations:
+- Single node with four resources: **H2I**, **Image**, **PDF**, and **Tools**.
+- H2I operations:
+  - Render HTML to Image
+  - Render HTML to PDF
+- Image operations:
   - Format, Resize, Crop, Transform, Compress, Enhance, Padding, Frame, Background, Watermark, PDF Export, Metadata, Multitask
-- PDF resource operations:
+- PDF operations:
   - To Images, Merge, Split, Compress, Extract Images, Watermark, Rotate, Metadata, Reorder, Delete Pages, Extract Pages, Flatten, Encrypt, Decrypt
-- Tools resource operations:
+- Tools operations:
   - Single Tool
   - Multitask
-- Accepts multiple incoming binary properties for Image, PDF, and Tools resources.
-- Optional binary download mode for H2I, Image (except metadata), and PDF operations.
-- Continue On Fail support through standard n8n node behavior.
+- Supports input binaries from prior nodes for Image/PDF/Tools operations.
+- Optional binary download of returned file URL(s) for H2I, Image (except Metadata), and PDF operations.
+- Supports standard n8n **Continue On Fail** behavior.
 
----
+## Architecture
+
+`n8n workflow` → `Davix H2I node` → `Davix H2I Engine (PixLab)`
+
+The node handles parameter mapping, authentication headers, request submission, and optional file download into n8n binary properties.
 
 ## Requirements
 
-- n8n instance with Community Nodes enabled.
-- PixLab API access (API key required).
-- For development/build in this repository:
-  - Node.js 20 is used in the repository publish workflow.
-
----
+- n8n with Community Nodes enabled.
+- PixLab API key (configured through node credentials).
+- Node.js 20 for repository CI/publishing workflow.
+- n8n compatibility is declared via peer dependency `n8n-workflow: *`.
 
 ## Installation
 
-### Option 1: Install via n8n Community Nodes
+### Install via n8n Community Nodes
 
 1. Open n8n.
 2. Go to **Settings → Community Nodes**.
-3. Click **Install**.
-4. Enter package name: `n8n-nodes-davix-h2i`.
-5. Install.
+3. Install package: `n8n-nodes-davix-h2i`.
+4. Restart n8n if your deployment requires it.
 
-Documentation: https://docs.n8n.io/integrations/community-nodes/
+Reference: https://docs.n8n.io/integrations/community-nodes/
 
 ---
 
-### Option 2: Manual / Development Installation
+### Local Development Installation
 
 ```bash
 git clone https://github.com/Davixlabs/n8n-nodes-davix-h2i.git
@@ -60,184 +66,137 @@ npm install
 npm run build
 ```
 
-For local development with n8n, link the built package into your n8n environment using your preferred npm linking workflow.
-
----
+Available repository scripts:
+- `npm run build`
+- `npm run dev`
+- `npm run lint`
+- `npm run lint:fix`
+- `npm test`
 
 ## Credentials
 
-Credential type in n8n:
+Credential type:
 - **Davix H2I (PixLab) API**
 
-Fields:
-- **Base URL**
-  - Default: `https://pixlab.davix.dev`
-  - Provide the PixLab API base URL (HTTPS, no trailing slash recommended).
+Required fields:
+- **Base URL** (default: `https://pixlab.davix.dev`)
 - **API Key**
-  - Your PixLab API key.
 
-How credentials are used:
-- The node validates the Base URL as an absolute HTTPS URL.
-- Requests are sent to `Base URL + endpoint`.
-- The API key is sent in the `x-api-key` request header.
+Usage details:
+- The Base URL is validated as an absolute HTTPS URL.
+- The node appends operation paths such as `/v1/h2i`, `/v1/image`, `/v1/pdf`, and `/v1/tools`.
+- The API key is sent as request header: `x-api-key`.
 
----
+To obtain API access details, use your Davix Labs account/support channel.
 
-## Usage
-
-1. Add **Davix H2I** to your workflow.
-2. Select a **Resource**.
-3. Select an **Operation**.
-4. Fill in required and optional fields.
-5. Provide input:
-   - H2I: HTML/CSS and render options.
-   - Image/PDF/Tools: one or more binary properties from previous nodes.
-6. Execute the node.
-7. Use JSON output and, if enabled, binary output properties in later nodes.
-
----
-
-### Supported Resources & Operations
+## Supported Resources & Operations
 
 | Resource | Operation | Description |
 |----------|----------|-------------|
-| H2I (HTML → Image) | Render HTML to Image | Sends HTML/CSS render payload to H2I endpoint and returns JSON (optional downloaded image binary). |
-| H2I (HTML → Image) | Render HTML to PDF | Sends HTML/CSS render payload for PDF output and returns JSON (optional downloaded PDF binary). |
-| Image (Transform / Export PDF) | Format | Converts/exports image format with optional dimensions and metadata options. |
-| Image (Transform / Export PDF) | Resize | Resizes input images with orientation/enlarge options. |
-| Image (Transform / Export PDF) | Crop | Crops input images using crop coordinates and size fields. |
-| Image (Transform / Export PDF) | Transform | Applies rotate/flip/colorspace style transform options. |
-| Image (Transform / Export PDF) | Compress | Applies quality/target size compression options. |
-| Image (Transform / Export PDF) | Enhance | Applies enhancement controls (blur, sharpen, grayscale, etc.). |
-| Image (Transform / Export PDF) | Padding | Adds configurable padding and related style options. |
-| Image (Transform / Export PDF) | Frame | Adds border/frame options around images. |
-| Image (Transform / Export PDF) | Background | Applies background color/blur style options. |
-| Image (Transform / Export PDF) | Watermark | Applies text/image watermark options. |
-| Image (Transform / Export PDF) | PDF Export | Exports input images into PDF output. |
-| Image (Transform / Export PDF) | Metadata (JSON only) | Returns metadata-oriented JSON response (binary download disabled). |
-| Image (Transform / Export PDF) | Multitask | Runs multiple image actions in one request. |
-| PDF (Merge/Split/Compress/Convert) | To Images | Converts PDF pages to images using conversion options. |
-| PDF (Merge/Split/Compress/Convert) | Merge | Merges PDF files with optional sort behavior. |
-| PDF (Merge/Split/Compress/Convert) | Split | Splits PDFs by ranges/prefix options. |
-| PDF (Merge/Split/Compress/Convert) | Compress | Compresses PDF files. |
-| PDF (Merge/Split/Compress/Convert) | Extract Images | Extracts embedded images from PDFs. |
-| PDF (Merge/Split/Compress/Convert) | Watermark | Applies text/image watermark options to PDFs. |
-| PDF (Merge/Split/Compress/Convert) | Rotate | Rotates PDF pages. |
-| PDF (Merge/Split/Compress/Convert) | Metadata | Reads/updates PDF metadata fields. |
-| PDF (Merge/Split/Compress/Convert) | Reorder | Reorders pages (CSV or JSON array input). |
-| PDF (Merge/Split/Compress/Convert) | Delete Pages | Removes selected pages. |
-| PDF (Merge/Split/Compress/Convert) | Extract Pages | Extracts pages with mode/prefix options. |
-| PDF (Merge/Split/Compress/Convert) | Flatten | Flattens forms. |
-| PDF (Merge/Split/Compress/Convert) | Encrypt | Encrypts PDF with user/owner passwords. |
-| PDF (Merge/Split/Compress/Convert) | Decrypt | Decrypts PDF with password. |
-| Tools (Analyze Images) | Single Tool | Runs one selected analysis tool against input images. |
-| Tools (Analyze Images) | Multitask | Runs multiple selected analysis tools in one request. |
+| H2I | Render HTML to Image | Sends HTML/CSS payload to `/v1/h2i` with `action: image`. |
+| H2I | Render HTML to PDF | Sends HTML/CSS payload to `/v1/h2i` with `action: pdf`. |
+| Image | Format | Converts/export format and supports size/metadata options. |
+| Image | Resize | Resizes input image(s) with resize options. |
+| Image | Crop | Crops input image(s) with coordinate fields. |
+| Image | Transform | Applies rotation/flip/colorspace style transforms. |
+| Image | Compress | Applies compression-related options. |
+| Image | Enhance | Applies enhancement options such as blur/sharpen/grayscale. |
+| Image | Padding | Adds padding with side and color options. |
+| Image | Frame | Adds border/frame options. |
+| Image | Background | Applies background color/blur options. |
+| Image | Watermark | Applies text/image watermark options. |
+| Image | PDF Export | Exports images to PDF output. |
+| Image | Metadata | Returns metadata JSON output (download disabled by implementation). |
+| Image | Multitask | Runs multiple image actions in one request. |
+| PDF | To Images | Converts PDF pages to images. |
+| PDF | Merge | Merges PDF files. |
+| PDF | Split | Splits PDF files by ranges. |
+| PDF | Compress | Compresses PDF files. |
+| PDF | Extract Images | Extracts embedded images from PDFs. |
+| PDF | Watermark | Applies watermark options to PDFs. |
+| PDF | Rotate | Rotates selected pages. |
+| PDF | Metadata | Sends metadata fields to PDF endpoint. |
+| PDF | Reorder | Reorders pages (CSV or JSON array input). |
+| PDF | Delete Pages | Deletes selected pages. |
+| PDF | Extract Pages | Extracts page ranges/pages. |
+| PDF | Flatten | Flattens form fields. |
+| PDF | Encrypt | Encrypts PDFs with passwords. |
+| PDF | Decrypt | Decrypts PDFs with password. |
+| Tools | Single Tool | Runs one selected analysis tool. |
+| Tools | Multitask | Runs multiple analysis tools in one request. |
 
----
+## Usage
 
-### Example Workflows
+1. Add **Davix H2I** to your n8n workflow.
+2. Select **Resource**.
+3. Select **Operation**.
+4. Configure required fields.
+5. For Image/PDF/Tools operations, set input binary property names from previous nodes.
+6. Choose binary download options where applicable.
+7. Execute and route JSON/binary output to downstream nodes.
 
-#### Example: Render HTML to Image
+### Example 1: HTML to Image
 
-- Resource: H2I (HTML → Image)
-- Operation: Render HTML to Image
-- Required fields: HTML
-- Optional fields: CSS, Width, Height, format, download options
-- Expected output: JSON response with result URL(s); optional downloaded binary file in configured output property
+- Resource: `h2i`
+- Operation: `image` (Render HTML to Image)
+- Required field: `HTML`
+- Common optional fields: `CSS`, `Width`, `Height`, `Format`, `Download Result as Binary`
+- Output: JSON response, optionally plus binary in `Output Binary Property`
 
-#### Example: Resize Image and Return Binary
+### Example 2: Image Resize
 
-- Resource: Image (Transform / Export PDF)
-- Operation: Resize
-- Required fields: Input Binary Properties
-- Common fields: image format, width/height, enlarge, normalize orientation
-- Expected output: JSON response plus downloaded image binary when enabled
+- Resource: `image`
+- Operation: `resize`
+- Required field: `Input Binary Properties`
+- Common fields: `Image Format`, `Width`, `Height`, `Enlarge`, `Normalize Orientation`, `Download Result as Binary`
+- Output: JSON response, optionally plus downloaded image binary
 
-#### Example: Merge PDFs
+### Example 3: PDF Merge
 
-- Resource: PDF (Merge/Split/Compress/Convert)
-- Operation: Merge
-- Required fields: Input Binary Properties
-- Optional fields: sortByName, binary download options
-- Expected output: JSON response with result URL(s); optional downloaded merged PDF binary
-
-#### Example: Run Multiple Analysis Tools
-
-- Resource: Tools (Analyze Images)
-- Operation: Multitask
-- Required fields: Input Binary Properties, Tools
-- Optional fields: tool-specific parameters (for example palette size, similarity settings)
-- Expected output: JSON analysis payload from the tools endpoint
-
----
+- Resource: `pdf`
+- Operation: `merge`
+- Required field: `Input Binary Properties`
+- Optional field: `Sort By Name`
+- Output: JSON response, optionally plus downloaded PDF binary in `Output Binary Property`
 
 ## Output
 
-- The node always returns JSON output from the API response.
-- H2I can optionally download the first returned URL as binary.
-- Image can optionally download returned result URL(s) as binary (metadata operation remains JSON-only).
-- PDF can optionally download returned result URL(s) as binary.
-- Tools operations return JSON output (no download toggle is implemented).
-
----
+- All operations return JSON in the item `json` object.
+- H2I returns JSON and can optionally download the first result URL into one binary property.
+- Image operations can download one or more result URLs into binary properties (except `metadata`, which is JSON-only by implementation).
+- PDF operations can download one or more result URLs into binary properties.
+- Tools operations return JSON output.
 
 ## Error Handling
 
-- API and transport errors are surfaced in n8n as node errors.
-- The request helper maps known status cases (for example 429, 503, 413) to clearer messages.
-- Error details may include API error code/message, hint text, and request ID when available.
-- With **Continue On Fail** enabled, the node returns an item containing error details instead of failing the entire execution.
+- Errors are surfaced as n8n node execution errors.
+- Request helper logic maps known response codes (including 429, 503, and 413) to clearer messages.
+- When available, parsed API error details may include code, hint, and request ID.
+- With **Continue On Fail**, the node returns error details in the output item instead of failing the full run.
 
-Common causes of failure:
-- Missing/invalid API key.
-- Invalid Base URL (must be absolute HTTPS URL).
-- Missing or incorrect binary property names.
-- Total uploaded binary size over 50 MB.
-- Operation-specific invalid field values (for example malformed page reorder JSON).
+Common misconfigurations:
+- Invalid/missing API key.
+- Invalid Base URL (non-HTTPS or malformed URL).
+- Wrong binary property names.
+- Total uploaded binary size exceeding the node’s 50 MB guardrail.
+- Invalid operation-specific inputs (for example malformed reorder JSON).
 
----
+## Support
 
-## Development
+For documentation and support:
 
-Repository structure (high level):
-- `nodes/DavixH2I/` — main node implementation and request helper.
-- `credentials/` — credential definition.
-- `src/index.ts` — node/credential exports.
-- `tests/` — helper function tests.
+- Website: https://davix.dev
+- Support: https://davix.dev
+- GitHub Issues (bug reports only): https://github.com/Davixlabs/n8n-nodes-davix-h2i/issues
 
-Build and checks:
+Please use GitHub Issues for reproducible bugs in this node. For general usage, account, or product support, use official Davix Labs support channels.
 
-```bash
-npm install
-npm run build
-npm run lint
-npm test
-```
+## About Davix Labs
 
-The build script compiles TypeScript and copies the node icon into `dist`.
+Davix Labs is the creator of DavixH2I and the Davix H2I Engine (PixLab).
 
-Contribution:
-- Submit changes through GitHub pull requests in this repository.
-
----
-
-## Publishing Notes
-
-This repository includes an npm publish workflow that:
-- runs on version tags matching `v*.*.*` (and manual dispatch),
-- verifies with install/lint/build/test and package checks,
-- then publishes to npm.
-
----
+Website: https://davix.dev
 
 ## License
 
 MIT
-
----
-
-## Links
-
-- n8n Documentation: https://docs.n8n.io/
-- n8n Community Nodes: https://docs.n8n.io/integrations/community-nodes/
-- PixLab / Davix H2I homepage: https://h2i.davix.dev
