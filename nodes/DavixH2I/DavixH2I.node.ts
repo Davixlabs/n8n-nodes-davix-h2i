@@ -58,7 +58,7 @@ export class DavixH2I implements INodeType {
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["resource"] + " • " + ($parameter["operation"] || "")}}',
-		description: 'Use Davix PixLab public API endpoints (H2I, Image, PDF, Tools).',
+		description: 'Use Davix H2I Engine (Pixlab) public API endpoints (H2I, Image, PDF, Tools).',
 		defaults: {
 			name: 'Davix H2I',
 		},
@@ -74,7 +74,7 @@ export class DavixH2I implements INodeType {
 					name: 'resource',
 					type: 'options',
 					default: 'h2i',
-					description: 'Choose which PixLab API group this node calls so only matching operations and fields are shown. Pick H2I for HTML rendering, Image for image edits, PDF for PDF tools, or Tools for analysis. e.g. PDF (Merge/Split/Compress/Convert).',
+					description: 'Choose which H2I Engine (Pixlab) API group this node calls so only matching operations and fields are shown. Pick H2I for HTML rendering, Image for image edits, PDF for PDF tools, or Tools for analysis. e.g. PDF (Merge/Split/Compress/Convert).',
 					options: [
 						{ name: 'H2I (HTML → Image)', value: 'h2i' },
 						{ name: 'Image (Transform / Export PDF)', value: 'image' },
@@ -191,7 +191,7 @@ export class DavixH2I implements INodeType {
 					name: 'width',
 					type: 'number',
 					default: 1000,
-					description: 'Set the target render width in pixels for H2I output. PixLab may clamp oversized values to allowed limits. e.g. 1000.',
+					description: 'Set the target render width in pixels for H2I output. H2I Engine (Pixlab) may clamp oversized values to allowed limits. e.g. 1000.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -199,7 +199,7 @@ export class DavixH2I implements INodeType {
 					name: 'height',
 					type: 'number',
 					default: 1500,
-					description: 'Set the target render height in pixels for H2I output. PixLab may clamp oversized values or reject renders that are too large. e.g. 1500.',
+					description: 'Set the target render height in pixels for H2I output. H2I Engine (Pixlab) may clamp oversized values or reject renders that are too large. e.g. 1500.',
 					displayOptions: { show: { resource: ['h2i'], operation: ['image', 'pdf'] } },
 				},
 				{
@@ -314,7 +314,7 @@ export class DavixH2I implements INodeType {
 					],
 					displayOptions: { show: { resource: ['image'] }, hide: { operation: ['multitask'] } },
 				},
-				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, description: 'Set output width in pixels for resize/format actions. Use 0 to let PixLab auto-calculate from height and aspect ratio. e.g. 1200.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
+				{ displayName: 'Width', name: 'imageWidth', type: 'number', default: 0, description: 'Set output width in pixels for resize/format actions. Use 0 to let H2I Engine (Pixlab) auto-calculate from height and aspect ratio. e.g. 1200.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
 				{ displayName: 'Height', name: 'imageHeight', type: 'number', default: 0, description: 'Set output height in pixels for resize/format actions. Use 0 to auto-calculate from width and aspect ratio. e.g. 800.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'format'] } } },
 				{ displayName: 'Enlarge', name: 'enlarge', type: 'boolean', default: false, description: 'Whether to allow enlarging images beyond original dimensions during resize. Keep off to avoid quality loss from upscaling. e.g. disabled for thumbnails.', displayOptions: { show: { resource: ['image'], operation: ['resize'] } } },
 				{ displayName: 'Normalize Orientation', name: 'normalizeOrientation', type: 'boolean', default: false, description: 'Whether to normalize image orientation using EXIF metadata before processing. Enable for photos from phones/cameras that may appear rotated. e.g. enabled for mobile uploads.', displayOptions: { show: { resource: ['image'], operation: ['resize', 'crop', 'enhance', 'metadata'] } } },
@@ -326,7 +326,7 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Rotate (degrees)', name: 'rotate', type: 'number', default: 0, description: 'Set rotation in degrees for transform actions. Use positive or negative values as needed by your layout. e.g. 90.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
 				{ displayName: 'Flip Horizontal', name: 'flipH', type: 'boolean', default: false, description: 'Whether to mirror the image left-to-right during transform. Combine with rotate when needed. e.g. enabled for selfie correction.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
 				{ displayName: 'Flip Vertical', name: 'flipV', type: 'boolean', default: false, description: 'Whether to mirror the image top-to-bottom during transform. Use only when a vertical inversion is required. e.g. enabled for camera rig output.', displayOptions: { show: { resource: ['image'], operation: ['transform'] } } },
-				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Choose output color space for transform/compress actions. cmyk may be rejected depending on PixLab build configuration. e.g. srgb.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Grayscale', value: 'grayscale' }, { name: 'CMYK', value: 'cmyk' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
+				{ displayName: 'Color Space', name: 'colorSpace', type: 'options', default: 'srgb', description: 'Choose output color space for transform/compress actions. cmyk may be rejected depending on H2I Engine (Pixlab) build configuration. e.g. srgb.', options: [{ name: 'sRGB', value: 'srgb' }, { name: 'Grayscale', value: 'grayscale' }, { name: 'CMYK', value: 'cmyk' }], displayOptions: { show: { resource: ['image'], operation: ['transform', 'compress'] } } },
 				{ displayName: 'Target Size (KB)', name: 'targetSizeKB', type: 'number', default: 0, description: 'Set target file size in kilobytes for compress action guidance. Leave 0 to skip target-size tuning. e.g. 250.', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{ displayName: 'Quality', name: 'quality', type: 'number', default: 82, description: 'Set encoder quality used by compression/output format paths. Higher values keep detail but produce larger files. e.g. 82.', displayOptions: { show: { resource: ['image'], operation: ['compress'] } } },
 				{
@@ -368,7 +368,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
-						description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
+						description: 'Choose watermark placement keyword supported by H2I Engine (Pixlab). Start with center or corner values for predictable results. e.g. bottom-right.',
 						options: [
 							{ name: 'Center', value: 'center' },
 							{ name: 'Top', value: 'top' },
@@ -781,7 +781,7 @@ export class DavixH2I implements INodeType {
 					name: 'watermarkPosition',
 					type: 'options',
 					default: 'center',
-						description: 'Choose watermark placement keyword supported by PixLab. Start with center or corner values for predictable results. e.g. bottom-right.',
+						description: 'Choose watermark placement keyword supported by H2I Engine (Pixlab). Start with center or corner values for predictable results. e.g. bottom-right.',
 					options: [
 						{ name: 'Center', value: 'center' },
 						{ name: 'Top', value: 'top' },
@@ -993,7 +993,7 @@ export class DavixH2I implements INodeType {
 				{ displayName: 'Subject', name: 'subject', type: 'string', default: '', description: 'Set PDF Subject metadata value in metadata action. e.g. Quarterly performance.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Keywords', name: 'keywords', type: 'string', default: '', description: 'Set PDF Keywords metadata as a comma-separated text string. e.g. finance,quarterly,kpi.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Creator', name: 'creator', type: 'string', default: '', description: 'Set PDF Creator metadata value in metadata action. e.g. n8n workflow.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
-				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF Producer metadata value in metadata action. e.g. Davix PixLab API.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
+				{ displayName: 'Producer', name: 'producer', type: 'string', default: '', description: 'Set PDF Producer metadata value in metadata action. e.g. Davix H2I Engine (Pixlab) API.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Clean All Metadata', name: 'cleanAllMetadata', type: 'boolean', default: false, description: 'Whether to clear existing PDF metadata before applying new metadata fields. Enable when you need a clean metadata set. e.g. enabled for document sanitization.', displayOptions: { show: { resource: ['pdf'], operation: ['metadata'] } } },
 				{ displayName: 'Order (CSV or JSON Array)', name: 'order', type: 'string', default: '', placeholder: '2,1,3', description: 'Enter page order as CSV or JSON array of positive page numbers. The node converts JSON arrays to CSV before sending to the API. e.g. 2,1,3.', displayOptions: { show: { resource: ['pdf'], operation: ['reorder'] } } },
 				{ displayName: 'Flatten Forms', name: 'flattenForms', type: 'boolean', default: true, description: 'Whether to flatten interactive form fields into static page content. Enable when recipients should not edit form fields. e.g. enabled before archival.', displayOptions: { show: { resource: ['pdf'], operation: ['flatten'] } } },
@@ -1086,7 +1086,7 @@ export class DavixH2I implements INodeType {
 					name: 'paletteSizeSingle',
 					type: 'number',
 					default: 5,
-					description: 'Set palette size for color analysis. PixLab supports a small bounded range, so keep values modest. e.g. 5.',
+					description: 'Set palette size for color analysis. H2I Engine (Pixlab) supports a small bounded range, so keep values modest. e.g. 5.',
 					displayOptions: { show: { resource: ['tools'], operation: ['single'], tool: ['palette'] } },
 				},
 				{
@@ -1164,7 +1164,7 @@ export class DavixH2I implements INodeType {
 					name: 'paletteSizeMulti',
 					type: 'number',
 					default: 5,
-					description: 'Set palette size for color analysis. PixLab supports a small bounded range, so keep values modest. e.g. 5.',
+					description: 'Set palette size for color analysis. H2I Engine (Pixlab) supports a small bounded range, so keep values modest. e.g. 5.',
 					displayOptions: { show: { resource: ['tools'], operation: ['multitask'], tools: ['palette'] } },
 				},
 				{
