@@ -13,8 +13,8 @@
 
 ## 12.2 Development Setup
 
-- Node.js version is specified in CI workflow as Node 20 (`actions/setup-node` with `node-version: 20`).  
-  **Evidence:** `.github/workflows/publish.yml:L19-L23`, `.github/workflows/publish.yml:L39-L43`
+- Node.js runtime requirement is declared in `package.json` as `engines.node: ">=20"` and CI uses Node 20 (`actions/setup-node` with `node-version: 20`).  
+  **Evidence:** `package.json:L54-L56`, `.github/workflows/publish.yml:L19-L23`, `.github/workflows/publish.yml:L39-L43`
 - A required n8n version is not pinned in `package.json`; only `peerDependencies.n8n-workflow` is set to `*`.  
   **Evidence:** `package.json:L43-L45`
 - Dependency installation command used in automation is `npm ci`.  
@@ -93,7 +93,7 @@
 
 ## Open Questions / Missing Evidence
 
-- Installation prerequisites (exact Node.js version for local development) are not declared in `package.json` `engines`; only CI Node version is shown.
+- Installation prerequisites include Node.js `>=20` as declared in `package.json` `engines`.
 - There is no dedicated changelog file in the repository root; README points to releases/tags, but release note generation rules are not defined.
 - `publishConfig` is absent, so package manager-level publish defaults (beyond CI command flags) are not explicitly documented.
 - No dedicated semantic-release tooling/config file is present; version increment process outside tag-based publishing is not defined.

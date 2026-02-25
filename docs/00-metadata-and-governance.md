@@ -40,8 +40,8 @@
   - CI and publish workflows run on Node.js `20`.
     **Evidence:** `.github/workflows/publish.yml:19-23`
     **Evidence:** `.github/workflows/publish.yml:39-43`
-  - Runtime requirement for end users is not explicitly declared in package `engines`.
-    **Evidence:** `package.json:1-54`
+  - Runtime requirement for end users is declared in package `engines` as Node.js `>=20`.
+    **Evidence:** `package.json:54-56`
 - Language/module format:
   - Source is TypeScript (`.ts` files included by compiler).
     **Evidence:** `tsconfig.json:17-21`
@@ -115,7 +115,7 @@
 ## Open Questions / Missing Evidence
 - Repository name is inferred from repository URL; no explicit standalone repository identifier file was found.
 - Explicit n8n core version compatibility range is not confirmed in code.
-- End-user Node.js runtime requirement is not confirmed in code (`engines` field absent).
+- End-user Node.js runtime requirement is confirmed in code via `engines.node: ">=20"`.
 - Formal CODEOWNERS or maintainer policy file is not confirmed in code.
 - Formal release notes/changelog file beyond README statements is not confirmed in code.
 - Dedicated documentation governance process beyond `agent.md` constraints is not confirmed in code.
