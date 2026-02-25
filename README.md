@@ -1,10 +1,10 @@
 # Davix H2I — n8n Community Node
 > Official Davix H2I integration for n8n, powered by the Davix H2I Engine (PixLab).
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/n8n-nodes-davix-h2i.svg)](https://www.npmjs.com/package/n8n-nodes-davix-h2i)
-[![n8n](https://img.shields.io/badge/integrates-n8n-orange.svg)](https://n8n.io)
-[![Website](https://img.shields.io/badge/website-h2i.davix.dev-black.svg)](https://h2i.davix.dev)
+[![License: MIT](https://img.shields.io/badge/license-MIT-black?labelColor=000000)](LICENSE)
+[![npm version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fregistry.npmjs.org%2Fn8n-nodes-davix-h2i&query=%24.version&label=npm&labelColor=000000&color=orange)](https://www.npmjs.com/package/n8n-nodes-davix-h2i)
+[![n8n](https://img.shields.io/badge/integrates-n8n-red?labelColor=000000)](https://n8n.io)
+[![Website](https://img.shields.io/badge/website-h2i.davix.dev-fc0082?labelColor=000000)](https://h2i.davix.dev)
 
 ## Overview
 
@@ -121,6 +121,15 @@ Behavior from implementation:
 2. Keep the default Base URL unless your Davix environment uses a different PixLab endpoint.
 3. Paste your API key.
 4. Save and select this credential in the Davix H2I node.
+
+## Get your Davix H2I API key
+
+To use this node, you’ll need a Davix H2I API key.
+
+- Create a free Davix H2I account to generate a free API key.
+- If you need higher limits, you can upgrade to a paid plan from your Davix H2I dashboard.
+
+Get started here: https://davix.dev
 
 ## Supported Resources & Operations
 
