@@ -41,6 +41,14 @@ test('parseDavixErrorEnvelope extracts nested envelope with request_id', () => {
 	});
 });
 
+
+test('parseDavixErrorEnvelope reads nested request_id fallback', () => {
+	const parsed = parseDavixErrorEnvelope({
+		error: { code: 'BAD_INPUT', message: 'Invalid', request_id: 'req_nested' },
+	});
+	assert.equal(parsed.requestId, 'req_nested');
+});
+
 test('parseDavixErrorEnvelope extracts requestId and auth is placed in headers', () => {
 	const parsed = parseDavixErrorEnvelope({
 		error: { code: 'BAD', message: 'Bad request' },
