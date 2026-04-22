@@ -1,6 +1,6 @@
 {
   "name": "@davixlabs/n8n-nodes-davix-h2i",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "n8n community node for the H2I API, enabling HTML-to-image and PDF rendering, image transformation, PDF operations, and visual analysis within automated workflows.",
   "license": "MIT",
   "repository": {
